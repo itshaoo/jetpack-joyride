@@ -3,6 +3,9 @@
 
 #include "pch.hpp" // IWYU pragma: export
 
+#include "Util/Renderer.hpp"
+#include "BackgroundImage.hpp"
+
 class App {
 public:
     enum class State {
@@ -24,6 +27,10 @@ private:
 
 private:
     State m_CurrentState = State::START;
+    
+    Util::Renderer m_Root;
+    std::shared_ptr<BackgroundImage> m_BackgroundImage;
+
 };
 
 #endif
