@@ -5,6 +5,7 @@
 
 #include "Util/Renderer.hpp"
 #include "BackgroundImage.hpp"
+#include "Object.hpp"
 
 class App {
 public:
@@ -30,6 +31,9 @@ private:
     
     Util::Renderer m_Root;
     std::shared_ptr<BackgroundImage> m_BackgroundImage;
+
+    std::shared_ptr<Object> m_icon;
+
 
 };
 

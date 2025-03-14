@@ -11,6 +11,13 @@ void App::Start() {
 
     m_BackgroundImage = std::make_shared<BackgroundImage>();
     m_Root.AddChild(m_BackgroundImage);
+
+    m_icon = std::make_shared<Object>(RESOURCE_DIR"/Image/Home/bgicon.png");
+    float centerX = ((WINDOW_WIDTH - m_icon->GetScaledSize().x) / 2.0f) +35;
+    float centerY = ((WINDOW_HEIGHT - m_icon->GetScaledSize().y) / 2.0f) -80;
+    m_icon->SetPosition({centerX, centerY});
+    m_icon->SetZIndex(50);
+    m_Root.AddChild(m_icon);
 }
 
 void App::Update() {
