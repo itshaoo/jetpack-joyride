@@ -7,7 +7,7 @@ int main(int, char**) {
     auto context = Core::Context::GetInstance();
     App app;
 
-    context->SetWindowIcon("../Resources/logo/icon.jpg");
+    context->SetWindowIcon(RESOURCE_DIR"/Image/logo/icon.png");
 
     while (!context->GetExit())
     {
