@@ -35,7 +35,7 @@ add_executable(${PROJECT_NAME}
     ${SRC_FILES}
     ${HEADER_FILES}
         src/Object.cpp
-
+        src/Animation.cpp
 )
 
 if(MSVC)

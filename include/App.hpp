@@ -6,6 +6,7 @@
 #include "Util/Renderer.hpp"
 #include "BackgroundImage.hpp"
 #include "Object.hpp"
+#include "Animation.hpp"
 
 class App {
 public:
@@ -33,6 +34,11 @@ private:
     std::shared_ptr<BackgroundImage> m_BackgroundImage;
 
     std::shared_ptr<Object> m_icon;
+    bool m_moveIcon;
+    bool m_iconOutOfWindow;
+
+    std::shared_ptr<Animation> m_Barry;
+
 
 
 };
