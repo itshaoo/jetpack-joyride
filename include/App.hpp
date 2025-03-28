@@ -36,8 +36,12 @@ private:
     std::shared_ptr<Object> m_icon;
     bool m_moveIcon;
     bool m_iconOutOfWindow;
+    bool m_isSpacePressed;
 
     std::shared_ptr<Animation> m_Barry;
+    std::shared_ptr<Animation> m_BarryFly;
+    std::shared_ptr<Animation> m_BarryFall;
+
 
 
 
