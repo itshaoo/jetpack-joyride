@@ -2,9 +2,10 @@
 #define APP_HPP
 
 #include "pch.hpp" // IWYU pragma: export
-
 #include "Util/Renderer.hpp"
-#include "BackgroundImage.hpp"
+#include "Logo.hpp"
+#include "Background.hpp"
+#include "Player.hpp"
 #include "Object.hpp"
 #include "Animation.hpp"
 
@@ -22,6 +23,8 @@ public:
 
     void Update();
 
+    void Render();
+
     void End(); // NOLINT(readability-convert-member-functions-to-static)
 
 private:
@@ -29,18 +32,15 @@ private:
 
 private:
     State m_CurrentState = State::START;
-    
+    Logo m_Logo;
+    Background m_Background;
+    bool m_BackgroundStarted = false;
+
     Util::Renderer m_Root;
-    std::shared_ptr<BackgroundImage> m_BackgroundImage;
 
-    std::shared_ptr<Object> m_icon;
-    bool m_moveIcon;
-    bool m_iconOutOfWindow;
+    bool m_isSpacePressed = false;
 
-    std::shared_ptr<Animation> m_Barry;
-
-
-
+    std::shared_ptr<Player> m_Player;
 };
 
 #endif

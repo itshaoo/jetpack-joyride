@@ -7,7 +7,6 @@
 #include "Util/Animation.hpp"
 #include "Util/GameObject.hpp"
 
-
 class Animation : public Util::GameObject {
 
 public:
