@@ -34,8 +34,16 @@ add_executable(${PROJECT_NAME}
     ${SRC_DIR}/main.cpp
     ${SRC_FILES}
     ${HEADER_FILES}
-        src/Object.cpp
+        include/Background.hpp
+        src/Background.cpp
+        include/Logo.hpp
+        src/Logo.cpp
+        include/Animation.hpp
         src/Animation.cpp
+        include/Object.hpp
+        src/Object.cpp
+        include/Player.hpp
+        src/Player.cpp
 )
 
 if(MSVC)
