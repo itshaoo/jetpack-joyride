@@ -4,6 +4,8 @@
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 #include "Player.hpp"
+#include "missile.hpp"
+#include "Camera.hpp"
 
 void App::Start() {
     LOG_TRACE("Start");
@@ -12,6 +14,9 @@ void App::Start() {
 
     m_Player = std::make_shared<Player>();
     m_Player->AddToRenderer(m_Root);
+
+    m_ZapperManager.SetRenderer(&m_Root);
+    m_CoinManager.SetRenderer(&m_Root);
 
     m_CurrentState = State::UPDATE;
 }
@@ -34,8 +39,17 @@ void App::Update() {
 
     if (m_BackgroundStarted) {
         m_Background.Update();
-
         m_Player->Update();
+
+        Camera::GetInstance().Update(0.016f);
+
+        m_ZapperManager.Update(0.016f);
+
+        m_CoinManager.Update(0.016f);
+
+        // 更新火箭生成邏輯，傳遞 Barry 的位置
+        Missile::UpdateMissiles(m_MissileSpawnInterval, m_Missiles, m_Root, m_Player->GetPosition());
+        Equipment::UpdateEquipments(EquipmentspawnInterval, equipments, m_Root, backgroundSpeed);
     }
 
     if (Util::Input::IsKeyUp(Util::Keycode::ESCAPE) || Util::Input::IfExit()) {
@@ -45,6 +59,6 @@ void App::Update() {
     m_Root.Update();
 }
 
-void App::End() { // NOLINT(this method will mutate members in the future)
+void App::End() {
     LOG_TRACE("End");
 }

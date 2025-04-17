@@ -44,6 +44,21 @@ add_executable(${PROJECT_NAME}
         src/Object.cpp
         include/Player.hpp
         src/Player.cpp
+        include/Camera.hpp
+        include/Coin.hpp
+        src/Coin.cpp
+        include/CoinGroup.hpp
+        src/CoinGroup.cpp
+        include/CoinManager.hpp
+        src/CoinManager.cpp
+        include/Zapper.hpp
+        include/ZapperManager.hpp
+        src/Zapper.cpp
+        src/ZapperManager.cpp
+        include/missile.hpp
+        src/missile.cpp
+        include/Equipment.hpp
+        src/Equipment.cpp
 )
 
 if(MSVC)
