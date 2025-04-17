@@ -18,7 +18,7 @@ void Logo::Update() {
     }
 
     if (m_IsMoving) {
-        m_Transform.translation.y += 5.0f;
+        m_Transform.translation.y += 7.0f;
     }
 }
 

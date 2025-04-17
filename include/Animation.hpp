@@ -39,7 +39,11 @@ public:
         temp->Play();
     }
 
+    void SetVisible(bool visible) { m_Visible = visible; }
+    bool IsVisible() const { return m_Visible; }
+
     [[nodiscard]] bool IfAnimationEnds() const;
+    
 
 };
 

@@ -44,6 +44,10 @@ add_executable(${PROJECT_NAME}
         src/Object.cpp
         include/Player.hpp
         src/Player.cpp
+        include/missile.hpp
+        src/missile.cpp
+        include/Equipment.hpp
+        src/Equipment.cpp
 )
 
 if(MSVC)
