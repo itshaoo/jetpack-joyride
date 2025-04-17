@@ -4,6 +4,7 @@
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 #include "Player.hpp"
+#include "missile.hpp"
 
 void App::Start() {
     LOG_TRACE("Start");
@@ -34,8 +35,11 @@ void App::Update() {
 
     if (m_BackgroundStarted) {
         m_Background.Update();
-
         m_Player->Update();
+
+        // 更新火箭生成邏輯，傳遞 Barry 的位置
+        Missile::UpdateMissiles(m_MissileSpawnInterval, m_Missiles, m_Root, m_Player->GetPosition());
+        Equipment::UpdateEquipments(EquipmentspawnInterval, equipments, m_Root, backgroundSpeed); 
     }
 
     if (Util::Input::IsKeyUp(Util::Keycode::ESCAPE) || Util::Input::IfExit()) {
@@ -45,6 +49,6 @@ void App::Update() {
     m_Root.Update();
 }
 
-void App::End() { // NOLINT(this method will mutate members in the future)
+void App::End() { 
     LOG_TRACE("End");
 }

@@ -10,6 +10,9 @@
 #include "Util/GameObject.hpp"
 
 class Object : public Util::GameObject {
+protected:
+    void ResetPosition() { m_Transform.translation = {0, 0}; }
+
 public:
     explicit Object(const std::string& ImagePath);
 
@@ -42,7 +45,6 @@ public:
 
 
 private:
-    void ResetPosition() { m_Transform.translation = {0, 0}; }
 
     std::string m_ImagePath;
 

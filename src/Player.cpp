@@ -82,5 +82,5 @@ void Player::Update() {
 }
 
 glm::vec2 Player::GetPosition() const {
-    return runAnimation->GetPosition();
+    return runAnimation->GetPosition(); 
 }
