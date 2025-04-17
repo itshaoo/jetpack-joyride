@@ -43,6 +43,7 @@ public:
     bool IsVisible() const { return m_Visible; }
 
     [[nodiscard]] bool IfAnimationEnds() const;
+    
 
 };
 
