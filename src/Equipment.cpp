@@ -7,14 +7,14 @@ float Equipment::equipmentSpawnTimer = 0.0f;
 
 Equipment::Equipment() {
     std::vector<std::string> equipmentFrames = {
-        RESOURCE_DIR "/Image/powerUp/powerUp0.png",
-        RESOURCE_DIR "/Image/powerUp/powerUp1.png",
-        RESOURCE_DIR "/Image/powerUp/powerUp2.png",
-        RESOURCE_DIR "/Image/powerUp/powerUp3.png",
-        RESOURCE_DIR "/Image/powerUp/powerUp4.png",
-        RESOURCE_DIR "/Image/powerUp/powerUp5.png",
-        RESOURCE_DIR "/Image/powerUp/powerUp6.png",
-        RESOURCE_DIR "/Image/powerUp/powerUp7.png"
+        RESOURCE_DIR "/Image/PowerUp/powerUp0.png",
+        RESOURCE_DIR "/Image/PowerUp/powerUp1.png",
+        RESOURCE_DIR "/Image/PowerUp/powerUp2.png",
+        RESOURCE_DIR "/Image/PowerUp/powerUp3.png",
+        RESOURCE_DIR "/Image/PowerUp/powerUp4.png",
+        RESOURCE_DIR "/Image/PowerUp/powerUp5.png",
+        RESOURCE_DIR "/Image/PowerUp/powerUp6.png",
+        RESOURCE_DIR "/Image/PowerUp/powerUp7.png"
     };
 
     equipmentAnimation = std::make_shared<Animation>(equipmentFrames);
@@ -22,6 +22,7 @@ Equipment::Equipment() {
     equipmentAnimation->SetInterval(100);
     equipmentAnimation->SetVisible(true);
     equipmentAnimation->Play();
+    equipmentAnimation->SetWorldObject(false);
 }
 
 void Equipment::SetPosition(const glm::vec2& position) {

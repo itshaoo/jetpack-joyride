@@ -12,7 +12,6 @@
 class Object : public Util::GameObject {
 protected:
     void ResetPosition() { m_Transform.translation = {0, 0}; }
-
 public:
     explicit Object(const std::string& ImagePath);
 

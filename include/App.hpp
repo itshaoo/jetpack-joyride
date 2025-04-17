@@ -8,8 +8,11 @@
 #include "Player.hpp"
 #include "Object.hpp"
 #include "Animation.hpp"
-#include "missile.hpp"
+#include "ZapperManager.hpp"
+#include "CoinManager.hpp"
+#include "Missile.hpp"
 #include "Equipment.hpp"
+#include "Camera.hpp"
 #include <vector>
 #include <memory>
 
@@ -26,14 +29,16 @@ public:
     void Start();
     void Update();
     void Render();
-    void End(); 
+    void End(); // NOLINT(readability-convert-member-functions-to-static)
 
 private:
     void ValidTask();
 
 private:
     State m_CurrentState = State::START;
+
     Logo m_Logo;
+
     Background m_Background;
     bool m_BackgroundStarted = false;
 
@@ -43,6 +48,8 @@ private:
     bool m_isSpacePressed = false;
 
     std::shared_ptr<Player> m_Player;
+    ZapperManager m_ZapperManager;
+    CoinManager m_CoinManager;
 
     std::vector<std::shared_ptr<Missile>> m_Missiles;
     float m_MissileSpawnTimer = 0.0f;
@@ -51,6 +58,7 @@ private:
     std::vector<std::shared_ptr<Equipment>> equipments;
     float EquipmentspawnInterval = 10000.0f; // 每 10 秒生成一個裝備
     float backgroundSpeed = 4.0f; // 背景速度
+
 };
 
 #endif

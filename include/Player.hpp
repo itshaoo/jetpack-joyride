@@ -16,6 +16,14 @@ public:
     void Update();
     // 將 Barry 的動畫加入到 Renderer 中， Renderer 負責 Draw()
     void AddToRenderer(Util::Renderer &renderer);
+
+    // 取得目前 Barry 的位置（所有動畫共享相同位置）
+    glm::vec2 m_Position; // Barry 的位置
+
+    // 設置位置
+    void SetPosition(const glm::vec2& position) {
+        m_Position = position;
+    }
     // 取得目前 Barry 的位置（所有動畫共享相同位置）
     glm::vec2 m_Position; // Barry 的位置
 
