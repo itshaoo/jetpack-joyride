@@ -6,28 +6,30 @@ float Missile::missileSpawnTimer = 0.0f;
 
 Missile::Missile() {
     std::vector<std::string> missileFrames = {
-        RESOURCE_DIR "/Image/missiles/missile0.png",
-        RESOURCE_DIR "/Image/missiles/missile1.png",
-        RESOURCE_DIR "/Image/missiles/missile2.png",
-        RESOURCE_DIR "/Image/missiles/missile3.png",
-        RESOURCE_DIR "/Image/missiles/missile4.png",
-        RESOURCE_DIR "/Image/missiles/missile5.png"
+        RESOURCE_DIR "/Image/Missile/missile0.png",
+        RESOURCE_DIR "/Image/Missile/missile1.png",
+        RESOURCE_DIR "/Image/Missile/missile2.png",
+        RESOURCE_DIR "/Image/Missile/missile3.png",
+        RESOURCE_DIR "/Image/Missile/missile4.png",
+        RESOURCE_DIR "/Image/Missile/missile5.png"
     };
     missileAnimation = std::make_shared<Animation>(missileFrames);
     missileAnimation->SetLooping(true);
     missileAnimation->SetInterval(100);
     missileAnimation->SetVisible(true);
     missileAnimation->Play();
+    missileAnimation->SetWorldObject(false);
 
     std::vector<std::string> warningFrames = {
-        RESOURCE_DIR "/Image/warning/warning0.png",
-        RESOURCE_DIR "/Image/warning/warning1.png"
+        RESOURCE_DIR "/Image/Warning/warning0.png",
+        RESOURCE_DIR "/Image/Warning/warning1.png"
     };
     warningAnimation = std::make_shared<Animation>(warningFrames);
     warningAnimation->SetLooping(true);
     warningAnimation->SetInterval(700);
     warningAnimation->SetVisible(true);
     warningAnimation->Play();
+    warningAnimation->SetWorldObject(false);
 }
 
 void Missile::SetTargetPosition(const glm::vec2& targetPosition) {
@@ -68,11 +70,11 @@ void Missile::UpdateMissiles(
     if (missileSpawnTimer >= spawnInterval) {
         missileSpawnTimer -= spawnInterval;
         auto missile = std::make_shared<Missile>();
-        
+
         // 設置導彈的目標位置
-        missile->SetTargetPosition(barryPosition); 
+        missile->SetTargetPosition(barryPosition);
         missile->SetBarryPositionPtr(&barryPosition); // 設置指標
-        
+
         missile->AddToRenderer(renderer);
         missiles.push_back(missile);
     }
@@ -103,7 +105,7 @@ void Missile::Update(float deltaTime) {
         glm::vec2 warningPos = { m_Position.x - 50.0f, m_TargetPosition.y };
         if (warningAnimation->GetPosition() != warningPos)
             warningAnimation->SetPosition(warningPos);
-        
+
         // 顯示警告動畫，隱藏導彈動畫
         warningAnimation->SetVisible(true);
         missileAnimation->SetVisible(false);
@@ -126,5 +128,3 @@ void Missile::Update(float deltaTime) {
         missileAnimation->SetVisible(true);
     }
 }
-
-
