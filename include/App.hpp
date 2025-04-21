@@ -12,7 +12,6 @@
 #include "CoinManager.hpp"
 #include "Missile.hpp"
 #include "Equipment.hpp"
-#include "Camera.hpp"
 #include <vector>
 #include <memory>
 
@@ -29,16 +28,12 @@ public:
     void Start();
     void Update();
     void Render();
-    void End(); // NOLINT(readability-convert-member-functions-to-static)
-
-private:
-    void ValidTask();
+    void End();
 
 private:
     State m_CurrentState = State::START;
 
     Logo m_Logo;
-
     Background m_Background;
     bool m_BackgroundStarted = false;
 
@@ -46,19 +41,23 @@ private:
     Util::Renderer renderer;
 
     bool m_isSpacePressed = false;
-
     std::shared_ptr<Player> m_Player;
-    ZapperManager m_ZapperManager;
-    CoinManager m_CoinManager;
 
+    // 背景滾動速度
+    float backgroundSpeed = 4.0f;
+
+    // 管理障礙物與硬幣
+    ZapperManager m_ZapperManager{ &m_Root, backgroundSpeed };
+    CoinManager   m_CoinManager{ &m_Root, backgroundSpeed };
+
+    // 火箭
     std::vector<std::shared_ptr<Missile>> m_Missiles;
     float m_MissileSpawnTimer = 0.0f;
-    const float m_MissileSpawnInterval = 5000.0f; // 每 5 秒生成一個火箭
+    const float m_MissileSpawnInterval = 5000.0f;
 
+    // 道具
     std::vector<std::shared_ptr<Equipment>> equipments;
-    float EquipmentspawnInterval = 10000.0f; // 每 10 秒生成一個裝備
-    float backgroundSpeed = 4.0f; // 背景速度
-
+    float EquipmentspawnInterval = 10000.0f;
 };
 
 #endif
