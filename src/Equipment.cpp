@@ -22,7 +22,6 @@ Equipment::Equipment() {
     equipmentAnimation->SetInterval(100);
     equipmentAnimation->SetVisible(true);
     equipmentAnimation->Play();
-    equipmentAnimation->SetWorldObject(false);
 }
 
 void Equipment::SetPosition(const glm::vec2& position) {

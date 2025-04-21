@@ -35,10 +35,6 @@ Player::Player() {
     fallAnimation->SetInterval(100);
     fallAnimation->Play();
     fallAnimation->SetVisible(false); // 起始隱藏
-
-    runAnimation->SetWorldObject(false);
-    flyAnimation->SetWorldObject(false);
-    fallAnimation->SetWorldObject(false);
 }
 
 void Player::AddToRenderer(Util::Renderer &renderer) {

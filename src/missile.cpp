@@ -18,7 +18,6 @@ Missile::Missile() {
     missileAnimation->SetInterval(100);
     missileAnimation->SetVisible(true);
     missileAnimation->Play();
-    missileAnimation->SetWorldObject(false);
 
     std::vector<std::string> warningFrames = {
         RESOURCE_DIR "/Image/Warning/warning0.png",
@@ -29,7 +28,6 @@ Missile::Missile() {
     warningAnimation->SetInterval(700);
     warningAnimation->SetVisible(true);
     warningAnimation->Play();
-    warningAnimation->SetWorldObject(false);
 }
 
 void Missile::SetTargetPosition(const glm::vec2& targetPosition) {
