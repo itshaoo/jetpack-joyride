@@ -1,4 +1,7 @@
 #include "Player.hpp"
+#include "Util/Time.hpp"
+#include "Util/BGM.hpp" 
+#include "Util/Animation.hpp"
 
 Player::Player() {
     // 建立並初始化地面跑動動畫
@@ -39,6 +42,9 @@ Player::Player() {
     runAnimation->SetWorldObject(false);
     flyAnimation->SetWorldObject(false);
     fallAnimation->SetWorldObject(false);
+
+    // 初始化步伐音效
+    stepSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/foot_step.wav");
 }
 
 void Player::AddToRenderer(Util::Renderer &renderer) {
@@ -77,8 +83,18 @@ void Player::Update() {
             runAnimation->SetVisible(true);
             flyAnimation->SetVisible(false);
             fallAnimation->SetVisible(false);
+
+            // 檢測跑動動畫的幀變化
+            int currentFrameIndex = runAnimation->GetCurrentFrameIndex();
+            if (currentFrameIndex != lastFrameIndex) {
+                stepSound->Play(0); // 播放音效
+                lastFrameIndex = currentFrameIndex;
+            }
+            
         }
     }
+
+    m_Distance += speed * (Util::Time::GetDeltaTimeMs() / 500.0f);
     // 更新所有動畫的共同位置
     runAnimation->SetPosition(pos);
     flyAnimation->SetPosition(pos);

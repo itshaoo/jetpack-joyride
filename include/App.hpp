@@ -13,6 +13,7 @@
 #include "Missile.hpp"
 #include "Equipment.hpp"
 #include "Camera.hpp"
+#include "DistanceText.hpp"
 #include <vector>
 #include <memory>
 
@@ -31,8 +32,6 @@ public:
     void Render();
     void End(); // NOLINT(readability-convert-member-functions-to-static)
 
-private:
-    void ValidTask();
 
 private:
     State m_CurrentState = State::START;
@@ -59,6 +58,8 @@ private:
     float EquipmentspawnInterval = 10000.0f; // 每 10 秒生成一個裝備
     float backgroundSpeed = 4.0f; // 背景速度
 
+    float m_Distance = 0.0f; // 距离
+    std::shared_ptr<DistanceText> m_DistanceText;
 };
 
 #endif

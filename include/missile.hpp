@@ -5,6 +5,7 @@
 #include <Util/Renderer.hpp>
 #include <Util/Time.hpp>
 #include <Animation.hpp>
+#include <Util/BGM.hpp> // Include BGM header
 
 class Missile {
 public:
@@ -33,6 +34,9 @@ private:
 
     float m_Speed = 10.0f;
     bool m_Launched = false;
+    std::shared_ptr<Util::BGM> missileSound; // 步伐音效
+
+    bool m_SoundPlayed = false; // 標誌音效是否已播放
 
     std::shared_ptr<Animation> missileAnimation;
     std::shared_ptr<Animation> warningAnimation;

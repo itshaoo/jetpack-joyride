@@ -1,10 +1,11 @@
 #include "Missile.hpp"
 #include <Util/Time.hpp>
 #include "Player.hpp"
+#include "Util/BGM.hpp"
 
 float Missile::missileSpawnTimer = 0.0f;
 
-Missile::Missile() {
+Missile::Missile(){
     std::vector<std::string> missileFrames = {
         RESOURCE_DIR "/Image/Missile/missile0.png",
         RESOURCE_DIR "/Image/Missile/missile1.png",
@@ -30,6 +31,8 @@ Missile::Missile() {
     warningAnimation->SetVisible(true);
     warningAnimation->Play();
     warningAnimation->SetWorldObject(false);
+
+    missileSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/missile_launch.wav");
 }
 
 void Missile::SetTargetPosition(const glm::vec2& targetPosition) {
@@ -121,6 +124,13 @@ void Missile::Update(float deltaTime) {
         }
     } else {
         m_Position.x -= m_Speed;
+    
+        // 播放導彈音效，只播放一次
+        if (!m_SoundPlayed) {
+            missileSound->Play(0);
+            m_SoundPlayed = true; // 設置標誌，防止重複播放
+        }
+        
         SetPosition(m_Position);
 
         // 確保警告動畫隱藏，導彈動畫顯示
