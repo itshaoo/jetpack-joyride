@@ -14,6 +14,11 @@ public:
     void Update(float backgroundSpeed);
     bool IsOffScreen(int windowWidth) const;
 
+    glm::vec2 GetPosition() const { return m_Position; }
+    glm::vec2 GetSize()     const { return m_Animation->GetScaledSize(); }
+
+    std::shared_ptr<Animation> GetAnimation() const { return m_Animation; }
+
 private:
     glm::vec2 m_Position;
     std::shared_ptr<Animation> m_Animation;

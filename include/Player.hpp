@@ -7,7 +7,9 @@
 #include "Util/Renderer.hpp"
 #include "Util/Keycode.hpp"
 #include "Util/Input.hpp"
+#include "Util/BGM.hpp"
 #include <glm/glm.hpp>
+#include "Util/Time.hpp"
 
 class Player {
 public:
@@ -27,14 +29,27 @@ public:
     // 取得目前 Barry 的位置（所有動畫共享相同位置）
     glm::vec2 GetPosition() const;
 
+    glm::vec2 GetSize() const {
+        return runAnimation->GetScaledSize();
+    }
+
+    float GetDistance() const { return m_Distance; }
+
 private:
     std::shared_ptr<Animation> runAnimation;
     std::shared_ptr<Animation> flyAnimation;
     std::shared_ptr<Animation> fallAnimation;
 
+    std::shared_ptr<Util::BGM> stepSound;
+    const float stepDistance = 7.5f;
+
     const glm::vec2 groundPosition = { -300.5f, -265.5f };
     const float maxHeight = 250.0f;
     const float speed = 7.5f;
+
+    float m_Distance = 0.0f;
+
+    int lastFrameIndex = -1;
 };
 
 #endif

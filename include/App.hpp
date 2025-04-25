@@ -12,6 +12,9 @@
 #include "CoinManager.hpp"
 #include "Missile.hpp"
 #include "Equipment.hpp"
+#include "CollisionManager.hpp"
+#include "CoinCounter.hpp"
+#include "DistanceText.hpp"
 #include <vector>
 #include <memory>
 
@@ -38,7 +41,6 @@ private:
     bool m_BackgroundStarted = false;
 
     Util::Renderer m_Root;
-    Util::Renderer renderer;
 
     bool m_isSpacePressed = false;
     std::shared_ptr<Player> m_Player;
@@ -58,6 +60,13 @@ private:
     // 道具
     std::vector<std::shared_ptr<Equipment>> equipments;
     float EquipmentspawnInterval = 10000.0f;
+
+    std::unique_ptr<CollisionManager> m_CollisionMgr;
+
+    std::shared_ptr<CoinCounter> m_CoinCounter;
+
+    float m_Distance = 0.0f; // 距离
+    std::shared_ptr<DistanceText> m_DistanceText;
 };
 
 #endif
