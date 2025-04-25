@@ -28,6 +28,8 @@ Missile::Missile() {
     warningAnimation->SetInterval(700);
     warningAnimation->SetVisible(true);
     warningAnimation->Play();
+
+    missileSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/missile_launch.wav");
 }
 
 void Missile::SetTargetPosition(const glm::vec2& targetPosition) {
@@ -119,6 +121,13 @@ void Missile::Update(float deltaTime) {
         }
     } else {
         m_Position.x -= m_Speed;
+
+        // 播放導彈音效，只播放一次
+        if (!m_SoundPlayed) {
+            missileSound->Play(0);
+            m_SoundPlayed = true; // 設置標誌，防止重複播放
+        }
+
         SetPosition(m_Position);
 
         // 確保警告動畫隱藏，導彈動畫顯示
