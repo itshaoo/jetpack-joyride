@@ -35,10 +35,12 @@ private:
     float m_TrackingTime = 1000.0f; 
     float m_TrackingTimer = 0.0f;
 
-    float m_Speed = 10.0f;
+    float m_Speed = 15.0f;
     bool m_Launched = false;
     std::shared_ptr<Util::BGM> missileSound;
+    std::shared_ptr<Util::BGM> warningSound;
 
+    bool m_WarningSoundPlayed = false;
     bool m_SoundPlayed = false;
 
     std::shared_ptr<Animation> missileAnimation;
