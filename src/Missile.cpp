@@ -18,7 +18,6 @@ Missile::Missile() {
     missileAnimation->SetInterval(100);
     missileAnimation->SetVisible(true);
     missileAnimation->Play();
-    missileAnimation->SetWorldObject(false);
 
     std::vector<std::string> warningFrames = {
         RESOURCE_DIR "/Image/Warning/warning0.png",
@@ -29,7 +28,10 @@ Missile::Missile() {
     warningAnimation->SetInterval(700);
     warningAnimation->SetVisible(true);
     warningAnimation->Play();
-    warningAnimation->SetWorldObject(false);
+
+    warningSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/missile_warning.wav");
+    missileSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/missile_launch.wav");
+
 }
 
 void Missile::SetTargetPosition(const glm::vec2& targetPosition) {
@@ -106,6 +108,11 @@ void Missile::Update(float deltaTime) {
         if (warningAnimation->GetPosition() != warningPos)
             warningAnimation->SetPosition(warningPos);
 
+        if (!m_WarningSoundPlayed) {
+            warningSound->Play(0);
+            m_WarningSoundPlayed = true; // 設置標誌，防止重複播放
+            }
+
         // 顯示警告動畫，隱藏導彈動畫
         warningAnimation->SetVisible(true);
         missileAnimation->SetVisible(false);
@@ -121,6 +128,13 @@ void Missile::Update(float deltaTime) {
         }
     } else {
         m_Position.x -= m_Speed;
+
+        // 播放導彈音效，只播放一次
+        if (!m_SoundPlayed) {
+            missileSound->Play(0);
+            m_SoundPlayed = true; // 設置標誌，防止重複播放
+        }
+
         SetPosition(m_Position);
 
         // 確保警告動畫隱藏，導彈動畫顯示
@@ -128,5 +142,3 @@ void Missile::Update(float deltaTime) {
         missileAnimation->SetVisible(true);
     }
 }
-
-
