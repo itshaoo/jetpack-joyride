@@ -13,7 +13,7 @@ public:
 
     void SetTargetPosition(const glm::vec2& targetPosition);
     void SetPosition(const glm::vec2& position);
-    void SetBarryPositionPtr(const glm::vec2* barryPositionPtr); // New method to set Barry's position pointer
+    void SetBarryPositionPtr(const glm::vec2* barryPositionPtr);  // New method to set Barry's position pointer
     void AddToRenderer(Util::Renderer& renderer);
     void Launch();
 
