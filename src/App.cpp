@@ -3,10 +3,7 @@
 #include "Util/Input.hpp"
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
-#include "Player.hpp"
-#include "missile.hpp"
-#include "Camera.hpp"
-#include "Util/BGM.hpp"
+#include "Util/Time.hpp"
 #include "iostream"
 
 void App::Start() {
@@ -24,13 +21,19 @@ void App::Start() {
 
     // 初始化距离文本
     m_DistanceText = std::make_shared<DistanceText>();
-    m_Root.AddChild(m_DistanceText); 
 
     m_Player = std::make_shared<Player>();
     m_Player->AddToRenderer(m_Root);
 
-    m_ZapperManager.SetRenderer(&m_Root);
-    m_CoinManager.SetRenderer(&m_Root);
+    m_CollisionMgr = std::make_unique<CollisionManager>(
+        m_Player.get(),
+        &m_ZapperManager,
+        &m_CoinManager,
+        m_Missiles,
+        equipments
+    );
+
+    m_CoinCounter = std::make_shared<CoinCounter>();
 
     m_CurrentState = State::UPDATE;
 }
@@ -40,40 +43,51 @@ void App::Render() {
         m_Logo.Render();
     }
     m_Background.Render();
-
 }
 
 void App::Update() {
     m_Logo.Update();
-
     m_isSpacePressed = Util::Input::IsKeyPressed(Util::Keycode::SPACE);
 
     if (!m_BackgroundStarted && m_Logo.IsOffScreen()) {
         m_BackgroundStarted = true;
+        m_Root.AddChild(m_CoinCounter);
+        m_Root.AddChild(m_DistanceText);
     }
 
     if (m_BackgroundStarted) {
+        // 背景與角色更新
         m_Background.Update();
         m_Player->Update();
 
-        float playerDistance = m_Player->GetDistance(); 
-        m_DistanceText->UpdateDistance(playerDistance); 
+        float playerDistance = m_Player->GetDistance();
+        m_DistanceText->UpdateDistance(playerDistance);
 
-        Camera::GetInstance().Update(0.016f);
+        // 更新障礙與硬幣
+        m_ZapperManager.Update();
+        m_CoinManager.Update();
 
-        m_ZapperManager.Update(0.016f);
+        // 更新火箭生成邏輯
+        Missile::UpdateMissiles(m_MissileSpawnInterval,
+                                m_Missiles,
+                                m_Root,
+                                m_Player->GetPosition());
+        Equipment::UpdateEquipments(EquipmentspawnInterval,
+                                    equipments,
+                                    m_Root,
+                                    backgroundSpeed);
 
-        m_CoinManager.Update(0.016f);
+        if (m_CollisionMgr->Update()) {
+            m_CurrentState = State::END;
+        }
 
-        // 更新火箭生成邏輯，傳遞 Barry 的位置
-        Missile::UpdateMissiles(m_MissileSpawnInterval, m_Missiles, m_Root, m_Player->GetPosition());
-        Equipment::UpdateEquipments(EquipmentspawnInterval, equipments, m_Root, backgroundSpeed);
+        m_CoinCounter->SetCount(m_CollisionMgr->GetCoinCount());
     }
 
-    if (Util::Input::IsKeyUp(Util::Keycode::ESCAPE) || Util::Input::IfExit()) {
+    if (Util::Input::IsKeyUp(Util::Keycode::ESCAPE) ||
+        Util::Input::IfExit()) {
         m_CurrentState = State::END;
     }
-    std::cout << "Distance: " << m_Player->GetDistance() << std::endl;
 
     m_Root.Update();
 }

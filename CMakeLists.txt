@@ -44,11 +44,8 @@ add_executable(${PROJECT_NAME}
         src/Object.cpp
         include/Player.hpp
         src/Player.cpp
-        include/Camera.hpp
         include/Coin.hpp
         src/Coin.cpp
-        include/CoinGroup.hpp
-        src/CoinGroup.cpp
         include/CoinManager.hpp
         src/CoinManager.cpp
         include/Zapper.hpp

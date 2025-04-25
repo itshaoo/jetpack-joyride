@@ -1,27 +1,28 @@
-#ifndef COIN_MANAGER_HPP
-#define COIN_MANAGER_HPP
+#ifndef COINMANAGER_HPP
+#define COINMANAGER_HPP
 
-#include "Util/GameObject.hpp"
-#include "Util/Renderer.hpp"
-#include "CoinGroup.hpp"
 #include <vector>
 #include <memory>
+#include <glm/glm.hpp>
+#include "Coin.hpp"
+#include "Util/Renderer.hpp"
 
 class CoinManager {
 public:
-    CoinManager();
-    ~CoinManager() = default;
+    CoinManager(Util::Renderer* renderer, float bgSpeed);
+    void Update();
 
-    // 每次更新：檢查是否 spawn 新群組
-    void Update(float deltaTime);
-    // 設定 Renderer，使生成的 CoinGroup 能加入 Renderer 統一渲染
-    void SetRenderer(Util::Renderer* renderer) { m_Renderer = renderer; }
 private:
-    void SpawnCoinGroup();
-    std::vector<std::shared_ptr<CoinGroup>> m_CoinGroups;
-    float m_SpawnTimer;
-    float m_SpawnInterval; // 隨機介於 4 至 6 秒
-    Util::Renderer* m_Renderer = nullptr;
+    void SpawnCoinPattern();
+
+    Util::Renderer* m_Renderer;
+    float m_BackgroundSpeed;
+    float m_SpawnTimer{0.0f};       // 毫秒
+    float m_SpawnInterval{4000.0f}; // 毫秒
+    float m_MinY{-265.5f}, m_MaxY{250.0f};
+
+    // 已 spawn 的硬幣
+    std::vector<std::shared_ptr<Coin>> m_Coins;
 };
 
-#endif // COIN_MANAGER_HPP
+#endif

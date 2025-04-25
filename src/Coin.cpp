@@ -1,22 +1,28 @@
 #include "Coin.hpp"
-#include "config.hpp" // 使用 RESOURCE_DIR
 
-Coin::Coin()
-    : Animation({
-          RESOURCE_DIR "/Image/Coin/coin1.png",
-          RESOURCE_DIR "/Image/Coin/coin2.png",
-          RESOURCE_DIR "/Image/Coin/coin3.png",
-          RESOURCE_DIR "/Image/Coin/coin4.png",
-          RESOURCE_DIR "/Image/Coin/coin5.png",
-          RESOURCE_DIR "/Image/Coin/coin6.png",
-          RESOURCE_DIR "/Image/Coin/coin7.png",
-          RESOURCE_DIR "/Image/Coin/coin8.png"
-      })
-{
-    // 設定硬幣動畫屬性：持續循環、每 100 毫秒換一幀
-    SetLooping(true);
-    SetInterval(100);
-    // Coin 物件預設為世界物件（不須修改 m_IsWorldObject）
+Coin::Coin(const std::vector<std::string>& frames, const glm::vec2& startPos)
+  : m_Position(startPos) {
+    m_Animation = std::make_shared<Animation>(frames);
+    m_Animation->SetLooping(true);
+    m_Animation->SetInterval(100);
+    m_Animation->Play();
+    m_Animation->SetPosition(m_Position);
+}
 
-    Play();
+void Coin::SetPosition(const glm::vec2& pos) {
+    m_Position = pos;
+    m_Animation->SetPosition(m_Position);
+}
+
+void Coin::AddToRenderer(Util::Renderer& renderer) {
+    renderer.AddChild(m_Animation);
+}
+
+void Coin::Update(float backgroundSpeed) {
+    m_Position.x -= backgroundSpeed;
+    m_Animation->SetPosition(m_Position);
+}
+
+bool Coin::IsOffScreen(int windowWidth) const {
+    return m_Position.x < -(windowWidth/2) - 100.0f;
 }
