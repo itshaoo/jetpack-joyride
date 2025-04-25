@@ -8,3 +8,4 @@ bool Animation::IfAnimationEnds() const {
     auto animation = std::dynamic_pointer_cast<Util::Animation>(m_Drawable);
     return animation->GetCurrentFrameIndex() == animation->GetFrameCount() - 1;
 }
+
