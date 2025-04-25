@@ -23,7 +23,7 @@ bool CollisionManager::CheckAABB(
     glm::vec2 posA, glm::vec2 sizeA,
     glm::vec2 posB, glm::vec2 sizeB
 ) const {
-    // 向內收縮
+
     glm::vec2 insetA = sizeA * kInsetRatio;
     glm::vec2 insetB = sizeB * kInsetRatio;
     posA += insetA;

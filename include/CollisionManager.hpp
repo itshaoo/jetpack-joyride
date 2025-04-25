@@ -33,7 +33,7 @@ private:
     ) const;
 
     // 收縮比例，0.0 ~ 0.5，越大命中框越小（敏感度越低）
-    static constexpr float kInsetRatio = 0.15f;
+    static constexpr float kInsetRatio = 0.05f;
 
     Player* m_Player;
     ZapperManager* m_ZapperMgr;
