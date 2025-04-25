@@ -2,11 +2,21 @@
 #define APP_HPP
 
 #include "pch.hpp" // IWYU pragma: export
-
 #include "Util/Renderer.hpp"
-#include "BackgroundImage.hpp"
+#include "Logo.hpp"
+#include "Background.hpp"
+#include "Player.hpp"
 #include "Object.hpp"
 #include "Animation.hpp"
+#include "ZapperManager.hpp"
+#include "CoinManager.hpp"
+#include "Missile.hpp"
+#include "Equipment.hpp"
+#include "CollisionManager.hpp"
+#include "CoinCounter.hpp"
+#include "DistanceText.hpp"
+#include <vector>
+#include <memory>
 
 class App {
 public:
@@ -19,28 +29,44 @@ public:
     State GetCurrentState() const { return m_CurrentState; }
 
     void Start();
-
     void Update();
-
-    void End(); // NOLINT(readability-convert-member-functions-to-static)
-
-private:
-    void ValidTask();
+    void Render();
+    void End();
 
 private:
     State m_CurrentState = State::START;
-    
+
+    Logo m_Logo;
+    Background m_Background;
+    bool m_BackgroundStarted = false;
+
     Util::Renderer m_Root;
-    std::shared_ptr<BackgroundImage> m_BackgroundImage;
 
-    std::shared_ptr<Object> m_icon;
-    bool m_moveIcon;
-    bool m_iconOutOfWindow;
+    bool m_isSpacePressed = false;
+    std::shared_ptr<Player> m_Player;
 
-    std::shared_ptr<Animation> m_Barry;
+    // 背景滾動速度
+    float backgroundSpeed = 4.0f;
 
+    // 管理障礙物與硬幣
+    ZapperManager m_ZapperManager{ &m_Root, backgroundSpeed };
+    CoinManager   m_CoinManager{ &m_Root, backgroundSpeed };
 
+    // 火箭
+    std::vector<std::shared_ptr<Missile>> m_Missiles;
+    float m_MissileSpawnTimer = 0.0f;
+    const float m_MissileSpawnInterval = 5000.0f;
 
+    // 道具
+    std::vector<std::shared_ptr<Equipment>> equipments;
+    float EquipmentspawnInterval = 10000.0f;
+
+    std::unique_ptr<CollisionManager> m_CollisionMgr;
+
+    std::shared_ptr<CoinCounter> m_CoinCounter;
+
+    float m_Distance = 0.0f; // 距离
+    std::shared_ptr<DistanceText> m_DistanceText;
 };
 
 #endif

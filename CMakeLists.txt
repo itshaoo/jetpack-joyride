@@ -34,8 +34,33 @@ add_executable(${PROJECT_NAME}
     ${SRC_DIR}/main.cpp
     ${SRC_FILES}
     ${HEADER_FILES}
-        src/Object.cpp
+        include/Background.hpp
+        src/Background.cpp
+        include/Logo.hpp
+        src/Logo.cpp
+        include/Animation.hpp
         src/Animation.cpp
+        include/Object.hpp
+        src/Object.cpp
+        include/Player.hpp
+        src/Player.cpp
+        include/Coin.hpp
+        src/Coin.cpp
+        include/CoinManager.hpp
+        src/CoinManager.cpp
+        include/Zapper.hpp
+        include/ZapperManager.hpp
+        src/Zapper.cpp
+        src/ZapperManager.cpp
+        include/missile.hpp
+        src/missile.cpp
+        include/Equipment.hpp
+        src/Equipment.cpp
+        include/CollisionManager.hpp
+        src/CollisionManager.cpp
+        include/CoinCounter.hpp
+        src/CoinCounter.cpp
+        include/DistanceText.hpp
 )
 
 if(MSVC)

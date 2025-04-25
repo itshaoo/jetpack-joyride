@@ -1,7 +1,6 @@
 #include "App.hpp"
 
 #include "Core/Context.hpp"
-#include "Util/Input.hpp"
 
 int main(int, char**) {
     auto context = Core::Context::GetInstance();
@@ -9,19 +8,19 @@ int main(int, char**) {
 
     context->SetWindowIcon(RESOURCE_DIR"/Image/logo/icon.png");
 
-    while (!context->GetExit())
-    {
+    while (!context->GetExit()) {
         switch (app.GetCurrentState()) {
-        case App::State::START:
-            app.Start();
+            case App::State::START:
+                app.Start();
             break;
 
-        case App::State::UPDATE:
-            app.Update();
+            case App::State::UPDATE:
+                app.Update();
+            app.Render();
             break;
 
-        case App::State::END:
-            app.End();
+            case App::State::END:
+                app.End();
             context->SetExit(true);
             break;
         }
