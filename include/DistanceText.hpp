@@ -15,7 +15,6 @@ public:
               10) // Z 值
     {
         m_Transform.translation = {-500.0f,300.0f}; // 固定的初始位置
-        SetWorldObject(false); // 這個物件不需要在世界座標系中
     }
 
     std::shared_ptr<Util::Text> GetText() const {

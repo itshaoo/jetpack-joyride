@@ -13,7 +13,7 @@ void ZapperManager::Update() {
     if (m_SpawnTimer >= m_SpawnInterval * 1000.0f) {
         SpawnZappers();
         m_SpawnTimer = 0.0f;
-        m_SpawnInterval = 2.0f + (std::rand() % 3);
+        m_SpawnInterval = 10.0f + (std::rand() % 2);
     }
     for (auto it = m_Zappers.begin(); it != m_Zappers.end();) {
         auto& zap = *it;
@@ -40,10 +40,16 @@ void ZapperManager::SpawnZappers() {
         RESOURCE_DIR"/Image/Zapper/zapper3.png",
         RESOURCE_DIR"/Image/Zapper/zapper4.png"
     };
+    std::vector<std::string> pathsdiag = {
+        RESOURCE_DIR"/Image/Zapper/zapperZ0.png",
+        RESOURCE_DIR"/Image/Zapper/zapperZ1.png",
+        RESOURCE_DIR"/Image/Zapper/zapperZ2.png",
+        RESOURCE_DIR"/Image/Zapper/zapperZ3.png"
+    };
     for (int i=0; i<count; ++i) {
-        bool vert = (std::rand()%2)==0;
+        bool vert = (std::rand()%3)==0;
         auto zap = std::make_shared<Zapper>(vert?pathsVert:pathsHor,
-                                           glm::vec2(spawnX + i*200.0f, baseY));
+                                           glm::vec2(spawnX + i*700.0f, baseY));
         zap->AddToRenderer(*m_Renderer);
         m_Zappers.push_back(zap);
     }

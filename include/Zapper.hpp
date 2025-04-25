@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "Animation.hpp"
 #include "Util/Renderer.hpp"
+#include <Util/BGM.hpp>
 
 class Zapper {
 public:
@@ -14,6 +15,9 @@ public:
     void AddToRenderer(Util::Renderer& renderer);
     void Update(float backgroundSpeed);
     bool IsOffScreen(int windowWidth) const;
+
+    glm::vec2 GetPosition() const { return m_Position; }
+    glm::vec2 GetSize()     const { return m_Animation->GetScaledSize(); }
 
 private:
     glm::vec2 m_Position;

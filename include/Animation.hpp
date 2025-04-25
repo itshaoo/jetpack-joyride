@@ -59,8 +59,6 @@ public:
         return std::dynamic_pointer_cast<Util::Animation>(m_Drawable)->GetInterval();
     }
 
-    
-
     [[nodiscard]] bool IfAnimationEnds() const;
 
 };

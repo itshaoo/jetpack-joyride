@@ -5,7 +5,7 @@
 #include <Util/Renderer.hpp>
 #include <Util/Time.hpp>
 #include <Animation.hpp>
-#include <Util/BGM.hpp> // Include BGM header
+#include <Util/BGM.hpp>
 
 class Missile {
 public:
@@ -25,6 +25,9 @@ public:
                                Util::Renderer& renderer,
                                const glm::vec2& barryPosition);
 
+    glm::vec2 GetPosition() const { return m_Position; }
+    glm::vec2 GetSize()     const { return missileAnimation->GetScaledSize(); }
+
 private:
     glm::vec2 m_Position = {650.0f, 0.0f};
     glm::vec2 m_TargetPosition{};
@@ -34,9 +37,9 @@ private:
 
     float m_Speed = 10.0f;
     bool m_Launched = false;
-    std::shared_ptr<Util::BGM> missileSound; // 步伐音效
+    std::shared_ptr<Util::BGM> missileSound;
 
-    bool m_SoundPlayed = false; // 標誌音效是否已播放
+    bool m_SoundPlayed = false;
 
     std::shared_ptr<Animation> missileAnimation;
     std::shared_ptr<Animation> warningAnimation;

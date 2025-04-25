@@ -11,6 +11,10 @@ public:
     ZapperManager(Util::Renderer* renderer, float bgSpeed);
     void Update();
 
+    const std::vector<std::shared_ptr<Zapper>>& GetZappers() const {
+        return m_Zappers;
+    }
+
 private:
     void SpawnZappers();
 
@@ -18,7 +22,7 @@ private:
     Util::Renderer* m_Renderer;
     float m_BackgroundSpeed;
     float m_SpawnTimer{0.0f};
-    float m_SpawnInterval{1.0f};
+    float m_SpawnInterval{3.0f};
     float m_MinY{-265.5f}, m_MaxY{250.0f};
 };
 

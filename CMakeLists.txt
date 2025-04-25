@@ -56,6 +56,11 @@ add_executable(${PROJECT_NAME}
         src/missile.cpp
         include/Equipment.hpp
         src/Equipment.cpp
+        include/CollisionManager.hpp
+        src/CollisionManager.cpp
+        include/CoinCounter.hpp
+        src/CoinCounter.cpp
+        include/DistanceText.hpp
 )
 
 if(MSVC)

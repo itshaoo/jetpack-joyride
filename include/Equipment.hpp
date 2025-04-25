@@ -20,6 +20,10 @@ public:
         Util::Renderer& renderer,
         float backgroundSpeed);
 
+    glm::vec2 GetPosition() const { return m_Position; }
+    glm::vec2 GetSize()     const { return equipmentAnimation->GetScaledSize(); }
+
+
 private:
     glm::vec2 m_Position = {650.0f, 0.0f};
     std::shared_ptr<Animation> equipmentAnimation;
