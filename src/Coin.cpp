@@ -1,8 +1,8 @@
 #include "Coin.hpp"
-
+#include <iostream>
 Coin::Coin(const std::vector<std::string>& frames, const glm::vec2& startPos)
   : m_Position(startPos) {
-    m_Animation = std::make_shared<Animation>(frames);
+    m_Animation = std::make_shared<Animation>(frames, /*z=*/3.0f);
     m_Animation->SetLooping(true);
     m_Animation->SetInterval(100);
     m_Animation->Play();

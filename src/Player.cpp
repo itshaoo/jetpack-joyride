@@ -1,8 +1,4 @@
 #include "Player.hpp"
-#include "Util/Input.hpp"
-#include "Util/Keycode.hpp"
-#include "Util/Time.hpp"
-#include "LilStomper.hpp" // <-- Add this include
 
 Player::Player() {
     // 建立並初始化地面跑動動畫
@@ -10,7 +6,7 @@ Player::Player() {
         RESOURCE_DIR"/Image/barry/barry0.png",
         RESOURCE_DIR"/Image/barry/barry1.png"
     };
-    runAnimation = std::make_shared<Animation>(runPaths);
+    runAnimation = std::make_shared<Animation>(runPaths, /*z=*/5.0f);
     runAnimation->SetPosition(groundPosition);
     runAnimation->SetLooping(true);
     runAnimation->SetInterval(100);
@@ -22,7 +18,7 @@ Player::Player() {
         RESOURCE_DIR"/Image/barry/barryflying1.png",
         RESOURCE_DIR"/Image/barry/barryflying2.png"
     };
-    flyAnimation = std::make_shared<Animation>(flyPaths);
+    flyAnimation = std::make_shared<Animation>(flyPaths, /*z=*/5.0f);
     flyAnimation->SetPosition(groundPosition);
     flyAnimation->SetLooping(true);
     flyAnimation->SetInterval(100);
@@ -33,7 +29,7 @@ Player::Player() {
     std::vector<std::string> fallPaths = {
         RESOURCE_DIR"/Image/barry/barryfalling.png"
     };
-    fallAnimation = std::make_shared<Animation>(fallPaths);
+    fallAnimation = std::make_shared<Animation>(fallPaths, /*z=*/5.0f);
     fallAnimation->SetPosition(groundPosition);
     fallAnimation->SetLooping(true);
     fallAnimation->SetInterval(100);
@@ -41,7 +37,7 @@ Player::Player() {
     fallAnimation->SetVisible(false); // 起始隱藏
 
     // 初始化步伐音效
-    stepSound = std::make_shared<Util::BGM>(RESOURCE_DIR"/Sounds/foot_step.wav");
+    stepSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/foot_step.wav");
 
     // 初始化重力套裝
     gravitySuit = std::make_shared<GravitySuit>();
@@ -83,7 +79,6 @@ void Player::AddToRenderer(Util::Renderer &renderer) {
     renderer.AddChild(lilStomper->GetFlyAnimation());
     renderer.AddChild(lilStomper->GetFallAnimation());
     renderer.AddChild(lilStomper->GetJumpAnimation());
-    
 }
 
 void Player::Update() {
@@ -150,7 +145,7 @@ void Player::Update() {
                 } else {
                     pos.y = maxHeight;
                 }
-                
+
             }
             break;
 
@@ -210,7 +205,7 @@ void Player::Update() {
                 } else {
                     pos.y -= speed + 5;
                 }
-            } 
+            }
             else if (isSpacePressed) {
                 state = PlayerState::FlyingUp;
                 // 只在剛進入 FlyingUp 狀態時設置為不循環並播放一次
@@ -297,7 +292,6 @@ void Player::Update() {
     lastSpacePressed = isSpacePressed;
 }
 
-
 glm::vec2 Player::GetPosition() const {
     if (hasGravitySuit) {
         return gravitySuit->GetRunAnimation()->GetPosition();
@@ -311,7 +305,7 @@ glm::vec2 Player::GetPosition() const {
 void Player::EnableGravitySuit() {
     hasGravitySuit = true;
     hasLilStomper = false;
-    
+
     // 同步位置，將重力套裝的所有動畫位置設為當前 Barry 的位置
     glm::vec2 currentPos = runAnimation->GetPosition();
     gravitySuit->GetRunAnimation()->SetPosition(currentPos);
@@ -324,7 +318,7 @@ void Player::EnableLilStomper() {
     hasLilStomper = true;
     hasGravitySuit = false;
     groundPosition.y = -220.5f; // Reset ground position for Lil Stomper
-    
+
     glm::vec2 currentPos = runAnimation->GetPosition();
     lilStomper->GetRunAnimation()->SetPosition(currentPos);
     lilStomper->GetFlyAnimation()->SetPosition(currentPos);
@@ -334,14 +328,9 @@ void Player::EnableLilStomper() {
 
 void Player::DisableGravitySuit() {
     hasGravitySuit = false;
-
 }
 
 void Player::DisableLilStomper() {
     hasLilStomper = false;
     groundPosition.y = -265.5f; // Reset ground position for normal state
 }
-
-
-
-

@@ -7,14 +7,14 @@ CollisionManager::CollisionManager(
     CoinManager* coinMgr,
     std::vector<std::shared_ptr<Missile>>& missiles,
     std::vector<std::shared_ptr<Equipment>>& equipments,
-    Util::Renderer* renderer // 新增這個參數
+    Util::Renderer* renderer
 ) : m_Player(player)
   , m_ZapperMgr(zapperMgr)
   , m_CoinMgr(coinMgr)
   , m_Missiles(missiles)
   , m_Equipments(equipments)
   , m_CoinCount(0)
-  , m_Renderer(renderer) // 新增這個初始化
+  , m_Renderer(renderer)
 {
     // 初始化金幣音效
     m_CoinSound = std::make_shared<Util::BGM>(std::string(RESOURCE_DIR) + "/Sounds/coin_pickup.wav");
@@ -26,18 +26,24 @@ bool CollisionManager::CheckAABB(
     glm::vec2 posB, glm::vec2 sizeB
 ) const {
 
-    glm::vec2 insetA = sizeA * kInsetRatio;
-    glm::vec2 insetB = sizeB * kInsetRatio;
-    posA += insetA;
-    sizeA -= insetA * 2.0f;
-    posB += insetB;
-    sizeB -= insetB * 2.0f;
+    // 你可以根據需要調整這個 margin 值（以像素為單位）
+    glm::vec2 marginA(10.0f, 10.0f);  // 物件 A 的內縮量：左右各 10 像素，上下各 10 像素
+    glm::vec2 marginB(10.0f, 10.0f);  // 物件 B 的內縮量
 
-    // 權威的 AABB 相交測試
-    return !(posA.x + sizeA.x < posB.x ||
-             posB.x + sizeB.x < posA.x ||
-             posA.y + sizeA.y < posB.y ||
-             posB.y + sizeB.y < posA.y);
+    // 建立物件 A 的碰撞框
+    glm::vec2 collisionPosA = posA + marginA;
+    // 因為左右各空出 marginA.x，上下各空出 marginA.y，所以要減掉2倍 margin
+    glm::vec2 collisionSizeA = sizeA - marginA * 2.0f;
+
+    // 建立物件 B 的碰撞框
+    glm::vec2 collisionPosB = posB + marginB;
+    glm::vec2 collisionSizeB = sizeB - marginB * 2.0f;
+
+    // 進行 AABB 碰撞檢測，只使用我們定義的碰撞框
+    return !(collisionPosA.x + collisionSizeA.x < collisionPosB.x ||
+             collisionPosB.x + collisionSizeB.x < collisionPosA.x ||
+             collisionPosA.y + collisionSizeA.y < collisionPosB.y ||
+             collisionPosB.y + collisionSizeB.y < collisionPosA.y);
 }
 
 bool CollisionManager::Update() {

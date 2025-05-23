@@ -10,7 +10,7 @@
 class Animation : public Util::GameObject {
 
 public:
-    explicit Animation(const std::vector<std::string>& AnimationPaths);
+    explicit Animation(const std::vector<std::string>& AnimationPaths, float zIndex = 0.0f);
 
     [[nodiscard]] bool IsLooping() const {
         return std::dynamic_pointer_cast<Util::Animation>(m_Drawable)->GetLooping();

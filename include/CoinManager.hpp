@@ -9,8 +9,11 @@
 
 class CoinManager {
 public:
-    CoinManager(Util::Renderer* renderer, float bgSpeed);
-    void Update();
+    CoinManager(Util::Renderer* renderer,
+                float bgSpeed,
+                float minY = -230.0f,   // groundPosition.y
+                float maxY =  230.0f);
+    void Update(float backgroundSpeed);
 
     std::vector<std::shared_ptr<Coin>>& GetCoins() { return m_Coins; }
     const std::vector<std::shared_ptr<Coin>>& GetCoins() const { return m_Coins; }
@@ -19,14 +22,16 @@ public:
         m_Renderer->RemoveChild(coin->GetAnimation());
     }
 
-private:
     void SpawnCoinPattern();
+
+    void UpdateExisting(float backgroundSpeed);
+
+private:
 
     Util::Renderer* m_Renderer;
     float m_BackgroundSpeed;
-    float m_SpawnTimer{0.0f};       // milliseconds
-    float m_SpawnInterval{4000.0f}; // milliseconds
-    float m_MinY{-265.5f}, m_MaxY{250.0f};
+    float m_MinY;
+    float m_MaxY;
 
     // Active coins in the scene
     std::vector<std::shared_ptr<Coin>> m_Coins;

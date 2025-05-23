@@ -2,26 +2,25 @@
 #include "config.hpp"
 #include "Util/Time.hpp"
 #include <cstdlib>
+#include <algorithm>
 
-CoinManager::CoinManager(Util::Renderer* renderer, float bgSpeed)
-  : m_Renderer(renderer), m_BackgroundSpeed(bgSpeed) {
+CoinManager::CoinManager(Util::Renderer* renderer,
+                         float bgSpeed,
+                         float minY,
+                         float maxY)
+  : m_Renderer(renderer),
+    m_BackgroundSpeed(bgSpeed),
+    m_MinY(minY),
+    m_MaxY(maxY)
+{
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 }
 
-void CoinManager::Update() {
-    // 累積時間，達到間隔就 spawn 新圖案
-    m_SpawnTimer += Util::Time::GetDeltaTimeMs();
-    if (m_SpawnTimer >= m_SpawnInterval) {
-        SpawnCoinPattern();
-        m_SpawnTimer = 0.0f;
-        // 隨機下一次間隔 3~6 秒
-        m_SpawnInterval = (3 + std::rand() % 4) * 1000.0f;
-    }
-
+void CoinManager::Update(float backgroundSpeed) {
     // 更新所有硬幣位置，並移除出螢幕者
     for (auto it = m_Coins.begin(); it != m_Coins.end();) {
         auto& coin = *it;
-        coin->Update(m_BackgroundSpeed);
+        coin->Update(backgroundSpeed); // 使用背景速度更新
         if (coin->IsOffScreen(WINDOW_WIDTH)) {
             it = m_Coins.erase(it);
         } else {
@@ -63,6 +62,7 @@ void CoinManager::SpawnCoinPattern() {
                     spawnX + col * cell,
                     baseY - (int(map.size())/2 - int(row)) * cell
                 );
+
                 // 使用原本的 coin animation 幀
                 std::vector<std::string> frames = {
                     RESOURCE_DIR"/Image/Coin/coin1.png",
@@ -74,10 +74,24 @@ void CoinManager::SpawnCoinPattern() {
                     RESOURCE_DIR"/Image/Coin/coin7.png",
                     RESOURCE_DIR"/Image/Coin/coin8.png"
                 };
+
+                // 通過檢查才生成
                 auto coin = std::make_shared<Coin>(frames, pos);
                 coin->AddToRenderer(*m_Renderer);
                 m_Coins.push_back(coin);
             }
+        }
+    }
+}
+
+void CoinManager::UpdateExisting(float backgroundSpeed) {
+    for (auto it = m_Coins.begin(); it != m_Coins.end();) {
+        auto& zap = *it;
+        zap->Update(backgroundSpeed);
+        if (zap->IsOffScreen(WINDOW_WIDTH)) {
+            it = m_Coins.erase(it);
+        } else {
+            ++it;
         }
     }
 }

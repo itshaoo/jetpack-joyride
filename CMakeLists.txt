@@ -60,11 +60,28 @@ add_executable(${PROJECT_NAME}
         src/CollisionManager.cpp
         include/CoinCounter.hpp
         src/CoinCounter.cpp
-        include/DistanceText.hpp
         include/GravitySuit.hpp
         src/GravitySuit.cpp
         include/LilStomper.hpp
         src/LilStomper.cpp
+        include/BestDistance.hpp
+        include/DistanceCounter.hpp
+        include/ILevel.hpp
+        include/Level.hpp
+        include/Level1.hpp
+        include/Level2.hpp
+        include/Level7.hpp
+        include/LevelSelect.hpp
+        include/MissionDescription.hpp
+        include/PauseMenu.hpp
+        src/BestDistance.cpp
+        src/DistanceCounter.cpp
+        src/Level1.cpp
+        src/Level2.cpp
+        src/Level7.cpp
+        src/LevelSelect.cpp
+        src/MissionDescription.cpp
+        src/PauseMenu.cpp
 )
 
 if(MSVC)

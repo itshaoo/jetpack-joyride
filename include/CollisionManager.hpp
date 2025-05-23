@@ -9,7 +9,7 @@
 #include "Missile.hpp"
 #include "Equipment.hpp"
 #include "Util/BGM.hpp"
-#include <Util/Renderer.hpp> // 確保有 include
+#include <Util/Renderer.hpp>
 
 class CollisionManager {
 public:
@@ -35,7 +35,7 @@ private:
     ) const;
 
     // 收縮比例，0.0 ~ 0.5，越大命中框越小（敏感度越低）
-    static constexpr float kInsetRatio = 0.05f;
+    static constexpr float kInsetRatio = 0.1f;
 
     Player* m_Player;
     ZapperManager* m_ZapperMgr;
@@ -46,7 +46,8 @@ private:
     int m_CoinCount = 0;
 
     std::shared_ptr<Util::BGM> m_CoinSound;
-    Util::Renderer* m_Renderer; // 新增這一行
+
+    Util::Renderer* m_Renderer;
 };
 
 #endif // COLLISIONMANAGER_HPP

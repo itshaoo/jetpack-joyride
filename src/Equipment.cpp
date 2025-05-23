@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <Util/Time.hpp>
-#include "Player.hpp"
+#include <algorithm>
 
 float Equipment::equipmentSpawnTimer = 0.0f;
 
@@ -18,7 +18,7 @@ Equipment::Equipment() {
         RESOURCE_DIR "/Image/PowerUp/powerUp7.png"
     };
 
-    equipmentAnimation = std::make_shared<Animation>(equipmentFrames);
+    equipmentAnimation = std::make_shared<Animation>(equipmentFrames, /*z=*/3.0f);
     equipmentAnimation->SetLooping(true);
     equipmentAnimation->SetInterval(100);
     equipmentAnimation->SetVisible(true);
@@ -47,22 +47,25 @@ void Equipment::UpdateEquipments(
     float spawnInterval,
     std::vector<std::shared_ptr<Equipment>>& equipments,
     Util::Renderer& renderer,
-    float backgroundSpeed
-) {
-    float deltaTime = Util::Time::GetDeltaTimeMs();
-    equipmentSpawnTimer += deltaTime;
+    float backgroundSpeed)
+{
+    float delta = Util::Time::GetDeltaTimeMs();
+    equipmentSpawnTimer += delta;
 
     if (equipmentSpawnTimer >= spawnInterval) {
         equipmentSpawnTimer -= spawnInterval;
         auto equipment = std::make_shared<Equipment>();
-        equipment->SetPosition({650.0f, 0.0f});
+
+        // 設置固定的 Y 軸位置，例如 300.0f
+        equipment->SetPosition({650.0f, 0.0f}); // 固定 Y 軸位置
         equipment->AddToRenderer(renderer);
         equipments.push_back(equipment);
     }
 
     for (auto it = equipments.begin(); it != equipments.end(); ) {
         auto& equipment = *it;
-        equipment->Update(backgroundSpeed);
+        equipment->Update(backgroundSpeed); // 傳遞背景速度
+
         if (equipment->IsOffScreen()) {
             it = equipments.erase(it);
             renderer.RemoveChild(equipment->equipmentAnimation);

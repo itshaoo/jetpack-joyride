@@ -2,22 +2,25 @@
 #include "config.hpp"
 #include <cstdlib>
 #include "Util/Time.hpp"
+#include <algorithm>
 
-ZapperManager::ZapperManager(Util::Renderer* renderer, float bgSpeed)
-  : m_Renderer(renderer), m_BackgroundSpeed(bgSpeed) {
+ZapperManager::ZapperManager(Util::Renderer* renderer,
+                             float bgSpeed,
+                             float minY,
+                             float maxY)
+  : m_Renderer(renderer),
+    m_BackgroundSpeed(bgSpeed),
+    m_MinY(minY),
+    m_MaxY(maxY)
+{
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 }
 
-void ZapperManager::Update() {
-    m_SpawnTimer += Util::Time::GetDeltaTimeMs();
-    if (m_SpawnTimer >= m_SpawnInterval * 1000.0f) {
-        SpawnZappers();
-        m_SpawnTimer = 0.0f;
-        m_SpawnInterval = 10.0f + (std::rand() % 2);
-    }
+void ZapperManager::Update(float backgroundSpeed) {
+    // 使用 backgroundSpeed 更新 Zapper 位置
     for (auto it = m_Zappers.begin(); it != m_Zappers.end();) {
         auto& zap = *it;
-        zap->Update(m_BackgroundSpeed);
+        zap->Update(backgroundSpeed); // 使用傳入的背景速度
         if (zap->IsOffScreen(WINDOW_WIDTH)) {
             it = m_Zappers.erase(it);
         } else ++it;
@@ -28,6 +31,7 @@ void ZapperManager::SpawnZappers() {
     int count = 3 + (std::rand()%3);
     float baseY = m_MinY + (std::rand()/(float)RAND_MAX)*(m_MaxY-m_MinY);
     float spawnX = (WINDOW_WIDTH/2) + 50.0f;
+    float spacingX = 1000.0f;                      // 每个 zapper 之间的水平间隔
     std::vector<std::string> pathsVert = {
         RESOURCE_DIR"/Image/Zapper/ver zapper1.png",
         RESOURCE_DIR"/Image/Zapper/ver zapper2.png",
@@ -46,12 +50,32 @@ void ZapperManager::SpawnZappers() {
         RESOURCE_DIR"/Image/Zapper/zapperZ2.png",
         RESOURCE_DIR"/Image/Zapper/zapperZ3.png"
     };
-    for (int i=0; i<count; ++i) {
-        bool vert = (std::rand()%3)==0;
-        auto zap = std::make_shared<Zapper>(vert?pathsVert:pathsHor,
-                                           glm::vec2(spawnX + i*700.0f, baseY));
+    for (int i = 0; i < count; ++i) {
+        int type = std::rand() % 3;  // 0 = vertical, 1 = horizontal, 2 = diagonal
+        const auto& chosenPaths = (type == 0 ? pathsVert
+                                  : type == 1 ? pathsHor
+                                              : pathsdiag);
+
+        // 随机 Y：在 [m_MinY, m_MaxY] 之间
+        float y = m_MinY + (std::rand() / (float)RAND_MAX) * (m_MaxY - m_MinY);
+        // X = 起始 + i*间隔
+        float x = spawnX + i * spacingX;
+
+        auto zap = std::make_shared<Zapper>(chosenPaths, glm::vec2{x, y});
         zap->AddToRenderer(*m_Renderer);
         m_Zappers.push_back(zap);
+    }
+}
+
+void ZapperManager::UpdateExisting(float backgroundSpeed) {
+    for (auto it = m_Zappers.begin(); it != m_Zappers.end();) {
+        auto& zap = *it;
+        zap->Update(backgroundSpeed);
+        if (zap->IsOffScreen(WINDOW_WIDTH)) {
+            it = m_Zappers.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
 

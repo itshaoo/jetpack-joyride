@@ -23,7 +23,7 @@ void Logo::Update() {
 }
 
 void Logo::Render() {
-    Core::Matrices matrices = Util::ConvertToUniformBufferData(m_Transform, m_Image.GetSize(), 0.0f);
+    Core::Matrices matrices = Util::ConvertToUniformBufferData(m_Transform, m_Image.GetSize(), 0.3f);
     m_Image.Draw(matrices);
 }
 

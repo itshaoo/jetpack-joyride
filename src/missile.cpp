@@ -13,7 +13,7 @@ Missile::Missile() {
         RESOURCE_DIR "/Image/Missile/missile4.png",
         RESOURCE_DIR "/Image/Missile/missile5.png"
     };
-    missileAnimation = std::make_shared<Animation>(missileFrames);
+    missileAnimation = std::make_shared<Animation>(missileFrames, /*z=*/4.0f);
     missileAnimation->SetLooping(true);
     missileAnimation->SetInterval(100);
     missileAnimation->SetVisible(true);
@@ -23,7 +23,7 @@ Missile::Missile() {
         RESOURCE_DIR "/Image/Warning/warning0.png",
         RESOURCE_DIR "/Image/Warning/warning1.png"
     };
-    warningAnimation = std::make_shared<Animation>(warningFrames);
+    warningAnimation = std::make_shared<Animation>(warningFrames, /*z=*/4.0f);
     warningAnimation->SetLooping(true);
     warningAnimation->SetInterval(700);
     warningAnimation->SetVisible(true);

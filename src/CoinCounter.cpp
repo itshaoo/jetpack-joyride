@@ -4,6 +4,7 @@
 #include <iomanip>
 
 CoinCounter::CoinCounter() {
+    SetZIndex(6.0f);
     SetCount(0);
 }
 
@@ -33,6 +34,7 @@ void CoinCounter::SetCount(int count) {
         std::string path = std::string(RESOURCE_DIR) + "/Image/Count/" + c + ".png";
         auto digitImg = std::make_shared<Object>(path);
         digitImg->SetPosition({ baseX + i * spacing, baseY });
+        digitImg->SetZIndex(6.0f);
         AddChild(digitImg);
     }
 
@@ -40,5 +42,6 @@ void CoinCounter::SetCount(int count) {
     std::string coinPath = std::string(RESOURCE_DIR) + "/Image/Count/coin.png";
     auto coinImg = std::make_shared<Object>(coinPath);
     coinImg->SetPosition({ baseX + s.size() * spacing + iconOffset, baseY });
+    coinImg->SetZIndex(6.0f);
     AddChild(coinImg);
 }
