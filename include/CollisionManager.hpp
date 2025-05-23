@@ -9,6 +9,7 @@
 #include "Missile.hpp"
 #include "Equipment.hpp"
 #include "Util/BGM.hpp"
+#include <Util/Renderer.hpp> // 確保有 include
 
 class CollisionManager {
 public:
@@ -17,7 +18,8 @@ public:
         ZapperManager* zapperMgr,
         CoinManager* coinMgr,
         std::vector<std::shared_ptr<Missile>>& missiles,
-        std::vector<std::shared_ptr<Equipment>>& equipments
+        std::vector<std::shared_ptr<Equipment>>& equipments,
+        Util::Renderer* renderer
     );
 
     // 回傳 true 表示玩家死亡，遊戲應該立即結束
@@ -44,6 +46,7 @@ private:
     int m_CoinCount = 0;
 
     std::shared_ptr<Util::BGM> m_CoinSound;
+    Util::Renderer* m_Renderer; // 新增這一行
 };
 
 #endif // COLLISIONMANAGER_HPP

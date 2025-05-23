@@ -6,13 +6,15 @@ CollisionManager::CollisionManager(
     ZapperManager* zapperMgr,
     CoinManager* coinMgr,
     std::vector<std::shared_ptr<Missile>>& missiles,
-    std::vector<std::shared_ptr<Equipment>>& equipments
+    std::vector<std::shared_ptr<Equipment>>& equipments,
+    Util::Renderer* renderer // 新增這個參數
 ) : m_Player(player)
   , m_ZapperMgr(zapperMgr)
   , m_CoinMgr(coinMgr)
   , m_Missiles(missiles)
   , m_Equipments(equipments)
   , m_CoinCount(0)
+  , m_Renderer(renderer) // 新增這個初始化
 {
     // 初始化金幣音效
     m_CoinSound = std::make_shared<Util::BGM>(std::string(RESOURCE_DIR) + "/Sounds/coin_pickup.wav");
@@ -42,26 +44,58 @@ bool CollisionManager::Update() {
     glm::vec2 pPos  = m_Player->GetPosition();
     glm::vec2 pSize = m_Player->GetSize();
 
-    // 1) Zapper 碰撞 → 結束
-    for (auto& zap : m_ZapperMgr->GetZappers()) {
+    // 1) Zapper 碰撞
+    for (auto it = m_ZapperMgr->GetZappers().begin(); it != m_ZapperMgr->GetZappers().end(); ) {
+        auto& zap = *it;
         if (CheckAABB(pPos, pSize, zap->GetPosition(), zap->GetSize())) {
-            std::cout << "Player hit Zapper\n";
-            return true;
+            if (m_Player->HasGravitySuit()) {
+                m_Player->DisableGravitySuit();
+                m_ZapperMgr->RemoveZapper(zap); // 用這個方法移除
+                it = m_ZapperMgr->GetZappers().begin(); // 重新取得 begin()，避免 iterator 失效
+                continue;
+            } else if (m_Player->HasLilStomper()) {
+                m_ZapperMgr->RemoveZapper(zap);
+                it = m_ZapperMgr->GetZappers().begin();
+                continue;
+            } else {
+                std::cout << "Player hit Zapper\n";
+                return true;
+            }
         }
+        ++it;
     }
 
-    // 2) Missile 碰撞 → 結束
-    for (auto& msl : m_Missiles) {
+    // 2) Missile 碰撞
+    for (auto it = m_Missiles.begin(); it != m_Missiles.end(); ) {
+        auto& msl = *it;
         if (CheckAABB(pPos, pSize, msl->GetPosition(), msl->GetSize())) {
-            std::cout << "Player hit Missile\n";
-            return true;
+            if (m_Player->HasGravitySuit()) {
+                m_Player->DisableGravitySuit();
+                it = m_Missiles.erase(it); // 移除障礙物
+                if (m_Renderer) {
+                m_Renderer->RemoveChild(std::static_pointer_cast<Util::GameObject>(msl->GetAnimationPtr()));
+            }
+                continue;
+            } else if (m_Player->HasLilStomper()) {
+                m_Player->DisableLilStomper();
+                it = m_Missiles.erase(it); // 移除障礙物
+                if (m_Renderer) {
+                m_Renderer->RemoveChild(std::static_pointer_cast<Util::GameObject>(msl->GetAnimationPtr()));
+                continue;
+            }
+            // Fix: add missing closing brace for else-if
+            } else {
+                std::cout << "Player hit Missile\n";
+                return true;
+            }
         }
+        ++it;
     }
 
     // 3) Coin 撿取 → 累加，不結束
     {
         auto& coins = m_CoinMgr->GetCoins();
-        for (auto it = coins.begin(); it != coins.end();) {
+        for (auto it = coins.begin(); it != coins.end(); ) {
             auto& coin = *it;
             if (CheckAABB(pPos, pSize,coin->GetPosition(), coin->GetSize())) {
                 if (m_CoinSound) m_CoinSound->Play(0);
@@ -74,12 +108,26 @@ bool CollisionManager::Update() {
         }
     }
 
-    // 4) Equipment 碰撞 → 只輸出，不結束
-    for (auto& eq : m_Equipments) {
+    // 4) Equipment 碰撞 → 撞到就消失
+    for (auto it = m_Equipments.begin(); it != m_Equipments.end(); ) {
+        auto& eq = *it;
         if (CheckAABB(pPos, pSize, eq->GetPosition(), eq->GetSize())) {
             std::cout << "Player touched Equipment\n";
+            // 隨機選擇一種裝備
+            if (std::rand() % 2 == 0) {
+                m_Player->EnableGravitySuit();
+            } else {
+                m_Player->EnableLilStomper();
+            }
+            if (m_Renderer) {
+                m_Renderer->RemoveChild(eq->equipmentAnimation);
+            }
+            it = m_Equipments.erase(it);
+        } else {
+            ++it;
         }
-    }
+    return false;
+}
 
     return false;
 }

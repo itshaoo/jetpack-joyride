@@ -13,6 +13,7 @@ public:
     void AddToRenderer(Util::Renderer& renderer);
     void Update(float backgroundSpeed); // 接受背景速度作為參數
     bool IsOffScreen() const;
+    std::shared_ptr<Animation> equipmentAnimation;
 
     static void UpdateEquipments(
         float spawnInterval,
@@ -26,7 +27,6 @@ public:
 
 private:
     glm::vec2 m_Position = {650.0f, 0.0f};
-    std::shared_ptr<Animation> equipmentAnimation;
-
+    
     static float equipmentSpawnTimer;
 };

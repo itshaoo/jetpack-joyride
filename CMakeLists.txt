@@ -61,6 +61,10 @@ add_executable(${PROJECT_NAME}
         include/CoinCounter.hpp
         src/CoinCounter.cpp
         include/DistanceText.hpp
+        include/GravitySuit.hpp
+        src/GravitySuit.cpp
+        include/LilStomper.hpp
+        src/LilStomper.cpp
 )
 
 if(MSVC)
