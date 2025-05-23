@@ -30,7 +30,8 @@ void App::Start() {
         &m_ZapperManager,
         &m_CoinManager,
         m_Missiles,
-        equipments
+        equipments,
+        &m_Root
     );
 
     m_CoinCounter = std::make_shared<CoinCounter>();
@@ -72,13 +73,18 @@ void App::Update() {
                                 m_Missiles,
                                 m_Root,
                                 m_Player->GetPosition());
+
+        if (!m_Player->HasGravitySuit() &&
+            !m_Player->HasLilStomper()) {
+            // 更新道具生成邏輯
         Equipment::UpdateEquipments(EquipmentspawnInterval,
                                     equipments,
                                     m_Root,
                                     backgroundSpeed);
+        }
 
         if (m_CollisionMgr->Update()) {
-            m_CurrentState = State::END;
+            std::cout << "player hit zapper" << std::endl;
         }
 
         m_CoinCounter->SetCount(m_CollisionMgr->GetCoinCount());

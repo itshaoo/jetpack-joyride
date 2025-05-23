@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <Util/Time.hpp>
+#include "Player.hpp"
 
 float Equipment::equipmentSpawnTimer = 0.0f;
 
@@ -46,25 +47,22 @@ void Equipment::UpdateEquipments(
     float spawnInterval,
     std::vector<std::shared_ptr<Equipment>>& equipments,
     Util::Renderer& renderer,
-    float backgroundSpeed)
-{
+    float backgroundSpeed
+) {
     float deltaTime = Util::Time::GetDeltaTimeMs();
     equipmentSpawnTimer += deltaTime;
 
     if (equipmentSpawnTimer >= spawnInterval) {
         equipmentSpawnTimer -= spawnInterval;
         auto equipment = std::make_shared<Equipment>();
-
-        // 設置固定的 Y 軸位置，例如 300.0f
-        equipment->SetPosition({650.0f, 0.0f}); // 固定 Y 軸位置
+        equipment->SetPosition({650.0f, 0.0f});
         equipment->AddToRenderer(renderer);
         equipments.push_back(equipment);
     }
 
     for (auto it = equipments.begin(); it != equipments.end(); ) {
         auto& equipment = *it;
-        equipment->Update(backgroundSpeed); // 傳遞背景速度
-
+        equipment->Update(backgroundSpeed);
         if (equipment->IsOffScreen()) {
             it = equipments.erase(it);
             renderer.RemoveChild(equipment->equipmentAnimation);

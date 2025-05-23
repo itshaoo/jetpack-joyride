@@ -54,3 +54,13 @@ void ZapperManager::SpawnZappers() {
         m_Zappers.push_back(zap);
     }
 }
+
+void ZapperManager::RemoveZapper(const std::shared_ptr<Zapper>& zapper) {
+    auto& zappers = m_Zappers;
+    // 先從 renderer 移除動畫
+    if (m_Renderer) {
+        m_Renderer->RemoveChild(std::static_pointer_cast<Util::GameObject>(zapper->GetAnimationPtr()));
+    }
+    // 再從容器移除
+    zappers.erase(std::remove(zappers.begin(), zappers.end(), zapper), zappers.end());
+}

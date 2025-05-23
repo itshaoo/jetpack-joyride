@@ -14,6 +14,8 @@ public:
     const std::vector<std::shared_ptr<Zapper>>& GetZappers() const {
         return m_Zappers;
     }
+    void RemoveZapper(const std::shared_ptr<Zapper>& zapper);
+
 
 private:
     void SpawnZappers();
