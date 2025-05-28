@@ -18,19 +18,21 @@ GravitySuit::GravitySuit() {
     std::vector<std::string> flyPaths = {
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_1_2.png",
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_2_2.png",
-        RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_3_2.png"
+        RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_3_2.png",
     };
     flyAnimation = std::make_shared<Animation>(flyPaths);
     flyAnimation->SetLooping(false);
-    flyAnimation->SetInterval(100);
+    flyAnimation->SetInterval(120);
     flyAnimation->Play();
 
     std::vector<std::string> fallPaths = {
+        RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_2_3.png", 
+        RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_1_3.png",  
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_2_1.png",
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_3_1.png"
     };
     fallAnimation = std::make_shared<Animation>(fallPaths);
-    fallAnimation->SetLooping(true);
+    fallAnimation->SetLooping(false);
     fallAnimation->SetInterval(100);
     fallAnimation->Play();
 
