@@ -7,7 +7,7 @@
 #include "Util/Renderer.hpp"
 #include "Util/Keycode.hpp"
 #include "Util/Input.hpp"
-#include "Util/BGM.hpp"
+#include "Util/SFX.hpp"
 #include <glm/glm.hpp>
 #include "Util/Time.hpp"
 #include "GravitySuit.hpp"
@@ -62,7 +62,7 @@ private:
     std::shared_ptr<LilStomper> lilStomper;
     bool hasLilStomper = false;
 
-    std::shared_ptr<Util::BGM> stepSound;
+    std::shared_ptr<Util::SFX> stepSound;
     const float stepDistance = 7.5f;
 
     PlayerState state = PlayerState::FallingDown; // 初始狀態為掉落動畫

@@ -95,6 +95,25 @@ void App::Render() {
         (down && over ? retryP : retryN).Draw(Util::ConvertToUniformBufferData(bt, retryN.GetSize(), 1.0f));
 
         {
+            static Util::Image quitN(RESOURCE_DIR "/Image/Pause/quit.png");
+            static Util::Image quitP(RESOURCE_DIR "/Image/Pause/quit2.png");
+            // 假設將 Quit 放在 Retry 左邊
+            glm::vec2 quitPos  = { -490.0f, -260.0f };
+            glm::vec2 btnSize  = { 240.0f, 96.0f };
+            glm::vec2 mp       = Util::Input::GetCursorPosition();
+            bool down          = Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB);
+            bool overQuit      = mp.x>=quitPos.x && mp.x<=quitPos.x+btnSize.x
+                              && mp.y>=quitPos.y && mp.y<=quitPos.y+btnSize.y;
+            Util::Transform qt;
+            qt.translation = quitPos;
+            qt.scale       = { btnSize.x/quitN.GetSize().x,
+                               btnSize.y/quitN.GetSize().y };
+            bool isPressedQuit = down && overQuit;
+            (isPressedQuit ? quitP : quitN)
+              .Draw(Util::ConvertToUniformBufferData(qt, quitN.GetSize(), 1.0f));
+        }
+
+        {
             // 假設你想把距離放在畫面上方中間偏下一點
             float baseX      = -50.0f;
             float baseY      =  100.0f;
@@ -445,7 +464,7 @@ void App::Update() {
             Util::Input::IfExit()) {
             m_CurrentState = State::END;
             return;
-        }
+            }
         // 處理 Retry 按鈕點擊
         bool up = Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB);
         glm::vec2 mp = Util::Input::GetCursorPosition();
@@ -463,22 +482,41 @@ void App::Update() {
             switch (m_CurrentLevelNumber) {
                 case 1:
                     m_Level1 = std::make_unique<Level1>(this);
-                    m_Level1->Start();
-                    m_CurrentState = State::LEVEL1;
-                    m_CurrentLevel = m_Level1.get();
-                    break;
+                m_Level1->Start();
+                m_CurrentState = State::LEVEL1;
+                m_CurrentLevel = m_Level1.get();
+                break;
                 case 2:
                     m_Level2 = std::make_unique<Level2>(this);
-                    m_Level2->Start();
-                    m_CurrentState = State::LEVEL2;
-                    m_CurrentLevel = m_Level2.get();
-                    break;
+                m_Level2->Start();
+                m_CurrentState = State::LEVEL2;
+                m_CurrentLevel = m_Level2.get();
+                break;
                 case 7:
                     m_Level7 = std::make_unique<Level7>(this);
-                    m_Level7->Start();
-                    m_CurrentState = State::LEVEL7;
-                    m_CurrentLevel = m_Level7.get();
-                    break;
+                m_Level7->Start();
+                m_CurrentState = State::LEVEL7;
+                m_CurrentLevel = m_Level7.get();
+                break;
+            }
+        }
+        {
+            // 處理 Quit 按鈕點擊
+            bool quitUp = Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB);
+            glm::vec2 quitMp2  = Util::Input::GetCursorPosition();
+            glm::vec2 quitPos2 = { -490.0f, -260.0f };
+            glm::vec2 quitSize2 = { 240.0f, 96.0f };
+            bool overQuit2 = quitMp2.x>=quitPos2.x && quitMp2.x<=quitPos2.x+quitSize2.x
+                                      && quitMp2.y>=quitPos2.y && quitMp2.y<=quitPos2.y+quitSize2.y;
+            if (quitUp && overQuit2) {
+                // 先重置整個遊戲狀態
+                m_Logo       = Logo();
+                m_Background = Background();
+                ResetGame();
+                // 回到選關畫面並重置按鈕狀態
+                static_cast<LevelSelect*>(m_LevelSelect.get())->Start();
+                m_CurrentState = State::LEVEL_SELECT;
+                return;
             }
         }
 

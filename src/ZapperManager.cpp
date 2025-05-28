@@ -29,9 +29,8 @@ void ZapperManager::Update(float backgroundSpeed) {
 
 void ZapperManager::SpawnZappers() {
     int count = 3 + (std::rand()%3);
-    float baseY = m_MinY + (std::rand()/(float)RAND_MAX)*(m_MaxY-m_MinY);
     float spawnX = (WINDOW_WIDTH/2) + 50.0f;
-    float spacingX = 1000.0f;                      // 每个 zapper 之间的水平间隔
+    float spacingX = 700.0f;                      // 每个 zapper 之间的水平间隔
     std::vector<std::string> pathsVert = {
         RESOURCE_DIR"/Image/Zapper/ver zapper1.png",
         RESOURCE_DIR"/Image/Zapper/ver zapper2.png",

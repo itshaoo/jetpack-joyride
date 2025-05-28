@@ -8,7 +8,7 @@
 #include "CoinManager.hpp"
 #include "Missile.hpp"
 #include "Equipment.hpp"
-#include "Util/BGM.hpp"
+#include "Util/SFX.hpp"
 #include <Util/Renderer.hpp>
 
 class CollisionManager {
@@ -45,7 +45,7 @@ private:
 
     int m_CoinCount = 0;
 
-    std::shared_ptr<Util::BGM> m_CoinSound;
+    std::shared_ptr<Util::SFX> m_CoinSound;
 
     Util::Renderer* m_Renderer;
 };

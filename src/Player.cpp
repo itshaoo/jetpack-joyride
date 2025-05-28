@@ -37,7 +37,7 @@ Player::Player() {
     fallAnimation->SetVisible(false); // 起始隱藏
 
     // 初始化步伐音效
-    stepSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/foot_step.wav");
+    stepSound = std::make_shared<Util::SFX>(RESOURCE_DIR "/Sounds/foot_step.wav");
 
     // 初始化重力套裝
     gravitySuit = std::make_shared<GravitySuit>();

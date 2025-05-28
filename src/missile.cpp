@@ -29,8 +29,8 @@ Missile::Missile() {
     warningAnimation->SetVisible(true);
     warningAnimation->Play();
 
-    warningSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/missile_warning.wav");
-    missileSound = std::make_shared<Util::BGM>(RESOURCE_DIR "/Sounds/missile_launch.wav");
+    warningSound = std::make_shared<Util::SFX>(RESOURCE_DIR "/Sounds/missile_warning.wav");
+    missileSound = std::make_shared<Util::SFX>(RESOURCE_DIR "/Sounds/missile_launch.wav");
 
 }
 

@@ -17,7 +17,7 @@ CollisionManager::CollisionManager(
   , m_Renderer(renderer)
 {
     // 初始化金幣音效
-    m_CoinSound = std::make_shared<Util::BGM>(std::string(RESOURCE_DIR) + "/Sounds/coin_pickup.wav");
+    m_CoinSound = std::make_shared<Util::SFX>(std::string(RESOURCE_DIR) + "/Sounds/coin_pickup.wav");
 }
 
 // 收縮 AABB 然後判定相交
@@ -133,7 +133,6 @@ bool CollisionManager::Update() {
             ++it;
         }
     return false;
-}
-
+    }
     return false;
 }
