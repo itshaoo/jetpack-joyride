@@ -20,6 +20,7 @@
 #include "Level1.hpp"
 #include "Level2.hpp"
 #include "Level7.hpp"
+#include "Level8.hpp"
 #include "LevelSelect.hpp"
 #include "MissionDescription.hpp"
 #include "PauseMenu.hpp"
@@ -36,6 +37,7 @@ public:
         LEVEL1,
         LEVEL2,
         LEVEL7,
+        LEVEL8,
         START,
         UPDATE,
         PAUSED,
@@ -72,6 +74,7 @@ private:
     std::unique_ptr<Level1> m_Level1;
     std::unique_ptr<Level2> m_Level2;
     std::unique_ptr<Level7> m_Level7;
+    std::unique_ptr<Level8> m_Level8;
     int m_CurrentLevelNumber = 1;
 
     Logo m_Logo;

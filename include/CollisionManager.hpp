@@ -27,6 +27,8 @@ public:
 
     int GetCoinCount() const { return m_CoinCount; }
 
+    int GetEquipmentCount() const { return m_EquipCount; }
+
 private:
     // 收縮後的 AABB 碰撞檢測
     bool CheckAABB(
@@ -48,6 +50,8 @@ private:
     std::shared_ptr<Util::SFX> m_CoinSound;
 
     Util::Renderer* m_Renderer;
+
+    int m_EquipCount = 0;
 };
 
 #endif // COLLISIONMANAGER_HPP

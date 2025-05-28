@@ -82,6 +82,8 @@ add_executable(${PROJECT_NAME}
         src/LevelSelect.cpp
         src/MissionDescription.cpp
         src/PauseMenu.cpp
+        include/Level8.hpp
+        src/Level8.cpp
 )
 
 if(MSVC)

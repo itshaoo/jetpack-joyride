@@ -23,6 +23,7 @@ int main(int, char**) {
             case App::State::LEVEL1:
             case App::State::LEVEL2:
             case App::State::LEVEL7:
+            case App::State::LEVEL8:
             case App::State::UPDATE:
             case App::State::PAUSED:
             case App::State::GAMEOVER:

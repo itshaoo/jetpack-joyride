@@ -70,6 +70,9 @@ void App::Render() {
     } else if (m_CurrentState == State::LEVEL7) {
         GameRender();
         m_Level7->Render();
+    } else if (m_CurrentState == State::LEVEL8) {
+        GameRender();
+        m_Level8->Render();
     } else if (m_CurrentState == State::GAMEOVER) {
         // 1) 畫 total.png 全螢幕
         Util::Image totalImg(RESOURCE_DIR "/Image/GameOver/total.png");
@@ -387,6 +390,11 @@ void App::Update() {
                 m_Level7->Start();
                 m_CurrentState = State::LEVEL7;
                 m_CurrentLevel   = m_Level7.get();
+            } else if (m_CurrentLevelNumber == 8) {
+                m_Level8 = std::make_unique<Level8>(this);
+                m_Level8->Start();
+                m_CurrentState = State::LEVEL8;
+                m_CurrentLevel   = m_Level8.get();
             }
         } else if (md->IsReturnChosen()) {
             // 点了 Back
@@ -402,6 +410,9 @@ void App::Update() {
     } else if (m_CurrentState == State::LEVEL7) {
         GameUpdate();
         m_Level7->Update();
+    } else if (m_CurrentState == State::LEVEL8) {
+        GameUpdate();
+        m_Level8->Update();
     } else if (m_CurrentState == State::UPDATE) {
         // 正常游戏模式
         GameUpdate();
@@ -435,6 +446,12 @@ void App::Update() {
                     m_Level7->Start();
                     m_CurrentState = State::LEVEL7;
                     m_CurrentLevel = m_Level7.get();
+                    break;
+                case 8:
+                    m_Level8 = std::make_unique<Level8>(this);
+                    m_Level8->Start();
+                    m_CurrentState = State::LEVEL8;
+                    m_CurrentLevel = m_Level8.get();
                     break;
             }
         } else if (m_PauseMenu->IsQuitChosen()) {
@@ -482,22 +499,28 @@ void App::Update() {
             switch (m_CurrentLevelNumber) {
                 case 1:
                     m_Level1 = std::make_unique<Level1>(this);
-                m_Level1->Start();
-                m_CurrentState = State::LEVEL1;
-                m_CurrentLevel = m_Level1.get();
-                break;
+                    m_Level1->Start();
+                    m_CurrentState = State::LEVEL1;
+                    m_CurrentLevel = m_Level1.get();
+                    break;
                 case 2:
                     m_Level2 = std::make_unique<Level2>(this);
-                m_Level2->Start();
-                m_CurrentState = State::LEVEL2;
-                m_CurrentLevel = m_Level2.get();
-                break;
+                    m_Level2->Start();
+                    m_CurrentState = State::LEVEL2;
+                    m_CurrentLevel = m_Level2.get();
+                    break;
                 case 7:
                     m_Level7 = std::make_unique<Level7>(this);
-                m_Level7->Start();
-                m_CurrentState = State::LEVEL7;
-                m_CurrentLevel = m_Level7.get();
-                break;
+                    m_Level7->Start();
+                    m_CurrentState = State::LEVEL7;
+                    m_CurrentLevel = m_Level7.get();
+                    break;
+                case 8:
+                    m_Level8 = std::make_unique<Level8>(this);
+                    m_Level8->Start();
+                    m_CurrentState = State::LEVEL8;
+                    m_CurrentLevel = m_Level8.get();
+                    break;
             }
         }
         {

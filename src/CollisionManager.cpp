@@ -129,6 +129,7 @@ bool CollisionManager::Update() {
                 m_Renderer->RemoveChild(eq->equipmentAnimation);
             }
             it = m_Equipments.erase(it);
+            ++m_EquipCount;
         } else {
             ++it;
         }
