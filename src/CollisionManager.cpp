@@ -104,8 +104,26 @@ bool CollisionManager::Update() {
         for (auto it = coins.begin(); it != coins.end(); ) {
             auto& coin = *it;
             if (CheckAABB(pPos, pSize,coin->GetPosition(), coin->GetSize())) {
+                // 1) 播放音效
                 if (m_CoinSound) m_CoinSound->Play(0);
                 ++m_CoinCount;
+
+                // 2) 在該位置產生閃光動畫
+                std::vector<std::string> paths = {
+                    RESOURCE_DIR "/Image/Coin/shining1.png",
+                    RESOURCE_DIR "/Image/Coin/shining2.png",
+                    RESOURCE_DIR "/Image/Coin/shining3.png",
+                    RESOURCE_DIR "/Image/Coin/shining4.png",
+                };
+
+                auto shine = std::make_shared<Animation>(paths, /*zIndex=*/7.0f);
+                shine->SetLooping(false);
+                shine->SetInterval(100);
+                shine->Play();
+                shine->SetPosition(coin->GetPosition());
+                m_Renderer->AddChild(shine);
+                m_ShineAnims.push_back(shine);
+
                 m_CoinMgr->RemoveCoin(coin);
                 it = coins.erase(it);
             } else {
@@ -133,7 +151,18 @@ bool CollisionManager::Update() {
         } else {
             ++it;
         }
-    return false;
+        return false;
     }
+
+    for (auto it = m_ShineAnims.begin(); it != m_ShineAnims.end(); ) {
+        auto& shine = *it;
+        if (shine->IfAnimationEnds()) {
+            m_Renderer->RemoveChild(shine);
+            it = m_ShineAnims.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
     return false;
 }

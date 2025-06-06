@@ -124,6 +124,8 @@ void Player::Update() {
             if (spaceJustPressed) {
                 state = PlayerState::FlyingUp;
                 curFly->SetVisible(true);
+                curFly->SetLooping(false);
+                curFly->Play();
             } else {
                 curRun->SetVisible(true);
                 int frame = gravitySuit->GetRunAnimation()->GetCurrentFrameIndex();
@@ -138,12 +140,15 @@ void Player::Update() {
             if (spaceJustPressed) {
                 state = PlayerState::FallingDown;
                 curFall->SetVisible(true);
+                curFall->SetLooping(false);
+                curFall->Play();
             } else {
                 curFly->SetVisible(true);
                 if (pos.y < maxHeight) {
                     pos.y += speed;
                 } else {
                     pos.y = maxHeight;
+                    state = PlayerState::AtTop;
                 }
 
             }
@@ -153,6 +158,8 @@ void Player::Update() {
             if (spaceJustPressed) {
                 state = PlayerState::FlyingUp;
                 curFly->SetVisible(true);
+                curFly->SetLooping(false);
+                curFly->Play();
             } else {
                 if (pos.y > groundPosition.y) {
                     pos.y -= speed;
@@ -172,8 +179,10 @@ void Player::Update() {
 
         case PlayerState::AtTop:
             if (spaceJustPressed) {
-                state = PlayerState::FlyingUp;
-                curFly->SetVisible(true);
+                state = PlayerState::FallingDown;
+                curFall->SetVisible(true);
+                curFall->SetLooping(false);
+                curFall->Play();
             } else {
                 cur->SetVisible(true);
                 int frame = cur->GetCurrentFrameIndex();
@@ -218,6 +227,9 @@ void Player::Update() {
         case PlayerState::FlyingUp:
             if (!isSpacePressed) {
                 state = PlayerState::FallingDown;
+                curFall->SetVisible(true);
+                curFall->SetLooping(false);
+                curFall->Play();
             }else {
                 curFly->SetVisible(true);
                 if (pos.y < maxHeight) {
@@ -232,6 +244,8 @@ void Player::Update() {
             if (spaceJustPressed) {
                 state = PlayerState::FlyingUp;
                 curFly->SetVisible(true);
+                curFly->SetLooping(false);
+                curFly->Play();
             } else {
                 if (pos.y > groundPosition.y) {
                     pos.y -= speed + 5;
@@ -288,6 +302,9 @@ void Player::Update() {
     // 累積移動距離
     m_Distance += speed * (Util::Time::GetDeltaTimeMs() / 500.0f);
 
+    if (IsOnGround()) {
+        m_WalkDistance += speed * (Util::Time::GetDeltaTimeMs() / 500.0f);
+    }
     // 更新按鍵狀態紀錄
     lastSpacePressed = isSpacePressed;
 }
@@ -308,6 +325,7 @@ void Player::EnableGravitySuit() {
 
     // 同步位置，將重力套裝的所有動畫位置設為當前 Barry 的位置
     glm::vec2 currentPos = runAnimation->GetPosition();
+    state = PlayerState::FallingDown;
     gravitySuit->GetRunAnimation()->SetPosition(currentPos);
     gravitySuit->GetFlyAnimation()->SetPosition(currentPos);
     gravitySuit->GetFallAnimation()->SetPosition(currentPos);
@@ -320,6 +338,7 @@ void Player::EnableLilStomper() {
     groundPosition.y = -220.5f; // Reset ground position for Lil Stomper
 
     glm::vec2 currentPos = runAnimation->GetPosition();
+    state = PlayerState::FallingDown;
     lilStomper->GetRunAnimation()->SetPosition(currentPos);
     lilStomper->GetFlyAnimation()->SetPosition(currentPos);
     lilStomper->GetFallAnimation()->SetPosition(currentPos);
@@ -328,9 +347,17 @@ void Player::EnableLilStomper() {
 
 void Player::DisableGravitySuit() {
     hasGravitySuit = false;
+    glm::vec2 suitPos = gravitySuit->GetRunAnimation()->GetPosition();
+    runAnimation->SetPosition(suitPos);
+    flyAnimation->SetPosition(suitPos);
+    fallAnimation->SetPosition(suitPos);
 }
 
 void Player::DisableLilStomper() {
     hasLilStomper = false;
     groundPosition.y = -265.5f; // Reset ground position for normal state
+    glm::vec2 suitPos = lilStomper->GetRunAnimation()->GetPosition();
+    runAnimation->SetPosition(suitPos);
+    flyAnimation->SetPosition(suitPos);
+    fallAnimation->SetPosition(suitPos);
 }

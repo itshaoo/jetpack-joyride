@@ -71,4 +71,3 @@ std::shared_ptr<Animation> LilStomper::GetFallAnimation() {
 std::shared_ptr<Animation> LilStomper::GetJumpAnimation() {
     return jumpAnimation;
 }
-

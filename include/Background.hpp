@@ -30,6 +30,8 @@ public:
 
     void NotifyLogoOffScreen() { m_RedLightActive = true; }
 
+    std::vector<std::pair<glm::vec2, glm::vec2>> GetRedLightBounds() const;
+
 private:
     enum class Phase {
         INITIAL,
@@ -39,11 +41,20 @@ private:
     std::vector<Util::Image> m_InitialImages;
     std::vector<Util::Image> m_LoopingImages;
 
+    // 新增：LOOPING 階段用的紅燈動畫、以及在一格裡的相對 offset
+    struct LoopRedLight {
+        OverlayAnim anim;
+        glm::vec2   offset;  // 相對於該背景 tile 左下角的位移
+    };
+    std::vector<LoopRedLight> m_LoopRedLights;
+
     OverlayAnim recBoardAnim;
     OverlayAnim wallBoardAnim;
     OverlayAnim redLightAnim;
 
     bool m_RedLightActive = false;
+
+    float m_RedLightTransition = 0.0f;
 
     float m_ScrollX;
     float m_ScaledWidth;
@@ -57,6 +68,12 @@ private:
 
     void renderInitial();
     void renderLooping();
+
+    float getTileWidth() const {
+        return m_ScaledWidth;
+    }
+    // 畫面上紅燈顯示的縮放比例，與 renderLooping() 中 redScale 相同
+    static constexpr float kRedScale = 0.7f;
 };
 
 #endif

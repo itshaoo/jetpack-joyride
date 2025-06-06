@@ -10,6 +10,7 @@
 #include "Equipment.hpp"
 #include "Util/SFX.hpp"
 #include <Util/Renderer.hpp>
+#include "Animation.hpp"
 
 class CollisionManager {
 public:
@@ -52,6 +53,9 @@ private:
     Util::Renderer* m_Renderer;
 
     int m_EquipCount = 0;
+
+    // 撿到金幣後的閃光動畫暫存
+    std::vector<std::shared_ptr<Animation>> m_ShineAnims;
 };
 
 #endif // COLLISIONMANAGER_HPP

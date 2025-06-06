@@ -19,6 +19,8 @@
 #include "ILevel.hpp"
 #include "Level1.hpp"
 #include "Level2.hpp"
+#include "Level4.hpp"
+#include "Level6.hpp"
 #include "Level7.hpp"
 #include "Level8.hpp"
 #include "LevelSelect.hpp"
@@ -36,6 +38,8 @@ public:
         MISSION_DESCRIPTION,
         LEVEL1,
         LEVEL2,
+        LEVEL4,
+        LEVEL6,
         LEVEL7,
         LEVEL8,
         START,
@@ -64,6 +68,16 @@ public:
 
     float GetDistance() const { return m_Distance; }
 
+    Background* GetBackground() { return &m_Background; }
+    Player*     GetPlayer()     { return m_Player.get();  }
+
+    // 返回第四关当前已触碰红灯数量（0~10）
+    int GetLevel4RedCount() const;
+    // 返回第四关的目标步行距离（500）与当前距离
+    float GetLevel4Distance() const;
+
+    // 返回第八关当前已收集装备数量（0~2）
+    int GetLevel8EquipCount() const;
 private:
     State m_CurrentState = State::LEVEL_SELECT;
     State m_PreviousState = State::UPDATE;
@@ -73,6 +87,8 @@ private:
     ILevel* m_CurrentLevel = nullptr;
     std::unique_ptr<Level1> m_Level1;
     std::unique_ptr<Level2> m_Level2;
+    std::unique_ptr<Level4> m_Level4;
+    std::unique_ptr<Level6> m_Level6;
     std::unique_ptr<Level7> m_Level7;
     std::unique_ptr<Level8> m_Level8;
     int m_CurrentLevelNumber = 1;
@@ -120,7 +136,6 @@ private:
     int m_CoinWavesLeft = 2;
     bool      m_HasSpawnedCurrentWave;
     bool m_EquipSpawnedOnce = false;
-
 
     void GameUpdate();   // 每帧更新背景、玩家、障碍、金币、碰撞……（原 UPDATE 分支内容）
     void GameRender();   // 每帧绘制背景、玩家、障碍、金币等，及暂停覆盖（原 Render 中 default 分支内容）

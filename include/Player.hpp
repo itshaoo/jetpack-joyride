@@ -51,6 +51,7 @@ public:
     bool HasGravitySuit() const { return hasGravitySuit; }
     bool HasLilStomper() const { return hasLilStomper; }
 
+    float GetWalkDistance() const { return m_WalkDistance; }
 private:
     std::shared_ptr<Animation> runAnimation;
     std::shared_ptr<Animation> flyAnimation;
@@ -77,6 +78,13 @@ private:
     float m_Distance = 0.0f;
 
     int lastFrameIndex = -1;
+
+    float m_WalkDistance = 0.0f;
+
+    bool IsOnGround() const {
+        float y = GetPosition().y;
+        return y <= groundPosition.y + 1e-2f;
+    }
 };
 
 #endif
