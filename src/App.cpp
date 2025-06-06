@@ -67,6 +67,12 @@ void App::Render() {
     } else if (m_CurrentState == State::LEVEL2) {
         GameRender();
         m_Level2->Render();
+    } else if (m_CurrentState == State::LEVEL4) {
+        GameRender();
+        m_Level4->Render();
+    } else if (m_CurrentState == State::LEVEL6) {
+        GameRender();
+        m_Level6->Render();
     } else if (m_CurrentState == State::LEVEL7) {
         GameRender();
         m_Level7->Render();
@@ -170,6 +176,63 @@ void App::Render() {
 
     // 如果在暫停，疊加暫停頁面
     if (m_CurrentState == State::PAUSED) {
+        // 准备两行文字对象
+        static std::shared_ptr<Util::Text> line1 =
+            std::make_shared<Util::Text>(
+                RESOURCE_DIR "/font/OpenSans_Condensed-ExtraBold.ttf",
+                28,
+                " ",
+                Util::Color::FromName(Util::Colors::WHITE)
+            );
+        static std::shared_ptr<Util::Text> line2 =
+            std::make_shared<Util::Text>(
+                RESOURCE_DIR "/font/OpenSans_Condensed-ExtraBold.ttf",
+                28,
+                " ",
+                Util::Color::FromName(Util::Colors::WHITE)
+            );
+
+        bool needDrawProgress = false;
+
+        if (m_CurrentLevelNumber == 4 && m_Level4) {
+            int  redCount = GetLevel4RedCount();
+            float dist4   = GetLevel4Distance();
+            line1->SetText("RED LIGHT: " + std::to_string(redCount) + "/10");
+            line2->SetText("DISTANCE: "  + std::to_string(static_cast<int>(dist4)) + "/500");
+            needDrawProgress = true;
+        }
+        else if (m_CurrentLevelNumber == 8 && m_Level8) {
+            int  equipCount = GetLevel8EquipCount();
+            line1->SetText("VEHICLE: " + std::to_string(equipCount) + "/2");
+            needDrawProgress = true;
+        }
+
+        if (needDrawProgress) {
+            // 先算出两行文字的宽高，方便居中对齐 + 向右/向下微调
+            glm::vec2 size1 = line1->GetSize();
+            glm::vec2 size2 = line2->GetSize();
+            float lineSpacing = 10.0f;             // 行间距
+            float blockWidth  = std::max(size1.x, size2.x);
+            float blockHeight = size1.y + size2.y + lineSpacing;
+
+            // 希望在居中基础上“向右 50、向下 30”
+            float offsetX = 50.0f;
+            float offsetY = 30.0f;
+
+            // 画第一行
+            Util::Transform t1;
+            t1.translation.x = -blockWidth * 0.5f + offsetX;
+            t1.translation.y =  blockHeight * 0.5f - size1.y * 0.5f - offsetY;
+            line1->Draw(Util::ConvertToUniformBufferData(t1, size1, 2.0f));
+
+            // 画第二行（紧接在第一行下面）
+            Util::Transform t2;
+            t2.translation.x = -blockWidth * 0.5f + offsetX;
+            t2.translation.y = t1.translation.y - (size1.y * 0.5f + lineSpacing + size2.y * 0.5f);
+            line2->Draw(Util::ConvertToUniformBufferData(t2, size2, 2.0f));
+        }
+
+        // 再把原来的暂停菜单（按钮、半透明蒙版等）画上去
         m_PauseMenu->Render();
     }
 }
@@ -334,6 +397,8 @@ void App::ResetGame() {
     m_BestDistance.reset();
 
     m_BackgroundStarted = false;
+
+    m_Distance = 0.0f;
 }
 
 void App::Update() {
@@ -385,6 +450,16 @@ void App::Update() {
                 m_Level2->Start();
                 m_CurrentState = State::LEVEL2;
                 m_CurrentLevel   = m_Level2.get();
+            } else if (m_CurrentLevelNumber == 4) {
+                m_Level4 = std::make_unique<Level4>(this);
+                m_Level4->Start();
+                m_CurrentState = State::LEVEL4;
+                m_CurrentLevel   = m_Level4.get();
+            } else if (m_CurrentLevelNumber == 6) {
+                m_Level6 = std::make_unique<Level6>(this);
+                m_Level6->Start();
+                m_CurrentState = State::LEVEL6;
+                m_CurrentLevel   = m_Level6.get();
             } else if (m_CurrentLevelNumber == 7) {
                 m_Level7 = std::make_unique<Level7>(this);
                 m_Level7->Start();
@@ -407,6 +482,12 @@ void App::Update() {
     } else if (m_CurrentState == State::LEVEL2) {
         GameUpdate();
         m_Level2->Update();
+    } else if (m_CurrentState == State::LEVEL4) {
+        GameUpdate();
+        m_Level4->Update();
+    } else if (m_CurrentState == State::LEVEL6) {
+        GameUpdate();
+        m_Level6->Update();
     } else if (m_CurrentState == State::LEVEL7) {
         GameUpdate();
         m_Level7->Update();
@@ -440,6 +521,18 @@ void App::Update() {
                     m_Level2->Start();
                     m_CurrentState = State::LEVEL2;
                     m_CurrentLevel = m_Level2.get();
+                    break;
+                case 4:
+                    m_Level4 = std::make_unique<Level4>(this);
+                    m_Level4->Start();
+                    m_CurrentState = State::LEVEL4;
+                    m_CurrentLevel = m_Level4.get();
+                    break;
+                case 6:
+                    m_Level6 = std::make_unique<Level6>(this);
+                    m_Level6->Start();
+                    m_CurrentState = State::LEVEL6;
+                    m_CurrentLevel = m_Level6.get();
                     break;
                 case 7:
                     m_Level7 = std::make_unique<Level7>(this);
@@ -509,6 +602,18 @@ void App::Update() {
                     m_CurrentState = State::LEVEL2;
                     m_CurrentLevel = m_Level2.get();
                     break;
+                case 4:
+                    m_Level4 = std::make_unique<Level4>(this);
+                    m_Level4->Start();
+                    m_CurrentState = State::LEVEL4;
+                    m_CurrentLevel = m_Level4.get();
+                    break;
+                case 6:
+                    m_Level6 = std::make_unique<Level6>(this);
+                    m_Level6->Start();
+                    m_CurrentState = State::LEVEL6;
+                    m_CurrentLevel = m_Level6.get();
+                    break;
                 case 7:
                     m_Level7 = std::make_unique<Level7>(this);
                     m_Level7->Start();
@@ -558,6 +663,24 @@ CollisionManager* App::GetCollisionManager() {
 
 PauseMenu* App::GetPauseMenu() {
     return m_PauseMenu.get();
+}
+
+int App::GetLevel4RedCount() const {
+    if (m_Level4) {
+        return m_Level4->GetRedTouchedCount();
+    }
+    return 0;
+}
+
+float App::GetLevel4Distance() const {
+    return m_Player->GetWalkDistance();
+}
+
+int App::GetLevel8EquipCount() const {
+    if (m_Level8) {
+        return m_Level8->GetEquipCount();
+    }
+    return 0;
 }
 
 void App::End() {

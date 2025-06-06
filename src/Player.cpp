@@ -143,7 +143,7 @@ void Player::Update() {
                 curFall->SetLooping(false);
                 curFall->Play();
             } else {
-                curFly->SetVisible(true); 
+                curFly->SetVisible(true);
                 if (pos.y < maxHeight) {
                     pos.y += speed;
                 } else {
@@ -182,7 +182,7 @@ void Player::Update() {
                 state = PlayerState::FallingDown;
                 curFall->SetVisible(true);
                 curFall->SetLooping(false);
-                curFall->Play();                
+                curFall->Play();
             } else {
                 cur->SetVisible(true);
                 int frame = cur->GetCurrentFrameIndex();
@@ -302,6 +302,9 @@ void Player::Update() {
     // 累積移動距離
     m_Distance += speed * (Util::Time::GetDeltaTimeMs() / 500.0f);
 
+    if (IsOnGround()) {
+        m_WalkDistance += speed * (Util::Time::GetDeltaTimeMs() / 500.0f);
+    }
     // 更新按鍵狀態紀錄
     lastSpacePressed = isSpacePressed;
 }
@@ -344,19 +347,15 @@ void Player::EnableLilStomper() {
 
 void Player::DisableGravitySuit() {
     hasGravitySuit = false;
-
     glm::vec2 suitPos = gravitySuit->GetRunAnimation()->GetPosition();
     runAnimation->SetPosition(suitPos);
     flyAnimation->SetPosition(suitPos);
     fallAnimation->SetPosition(suitPos);
 }
 
-
-
 void Player::DisableLilStomper() {
     hasLilStomper = false;
     groundPosition.y = -265.5f; // Reset ground position for normal state
-
     glm::vec2 suitPos = lilStomper->GetRunAnimation()->GetPosition();
     runAnimation->SetPosition(suitPos);
     flyAnimation->SetPosition(suitPos);

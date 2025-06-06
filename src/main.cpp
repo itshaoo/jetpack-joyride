@@ -22,6 +22,8 @@ int main(int, char**) {
             case App::State::MISSION_DESCRIPTION:
             case App::State::LEVEL1:
             case App::State::LEVEL2:
+            case App::State::LEVEL4:
+            case App::State::LEVEL6:
             case App::State::LEVEL7:
             case App::State::LEVEL8:
             case App::State::UPDATE:
