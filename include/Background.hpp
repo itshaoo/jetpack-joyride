@@ -32,6 +32,7 @@ public:
 
     std::vector<std::pair<glm::vec2, glm::vec2>> GetRedLightBounds() const;
 
+    std::pair<glm::vec2, glm::vec2> GetInitialRedLightBounds() const;
 private:
     enum class Phase {
         INITIAL,

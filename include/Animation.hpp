@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-
 #include "Util/Animation.hpp"
 #include "Util/GameObject.hpp"
 

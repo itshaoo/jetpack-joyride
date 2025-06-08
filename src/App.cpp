@@ -7,6 +7,7 @@
 #include "Util/Time.hpp"
 #include "config.hpp"
 #include <iostream>
+#include <SDL_mixer.h>
 
 App::App()
   : m_ZapperManager(&m_Root, backgroundSpeed),
@@ -20,24 +21,17 @@ App::App()
     m_LevelSelect = std::make_unique<LevelSelect>(btnSize, spacing);
 }
 
-void App::Start() {
-    LOG_TRACE("Start");
-
+void App::InitGame() {
+    // 1) 完全重置游戏状态
     ResetGame();
 
-    // 初始化背景音樂
-    Util::BGM bgm(RESOURCE_DIR  "/Sounds/background_music.wav");
-    bgm.SetVolume(50);
-    bgm.Play(-1);
-
-    // 一開始呼叫 Render，畫出 Logo
-    Render();
-
-    // 初始化遊戲物件
+    m_CoinCounter = std::make_shared<CoinCounter>();
     m_DistanceCounter = std::make_shared<DistanceCounter>();
-    m_BestDistance = std::make_shared<BestDistance>();
-    m_Player = std::make_shared<Player>();
+    m_BestDistance    = std::make_shared<BestDistance>();
+
+    m_Player          = std::make_shared<Player>();
     m_Player->AddToRenderer(m_Root);
+
     m_CollisionMgr = std::make_unique<CollisionManager>(
         m_Player.get(),
         &m_ZapperManager,
@@ -46,12 +40,11 @@ void App::Start() {
         equipments,
         &m_Root
     );
-    m_CoinCounter = std::make_shared<CoinCounter>();
 
-    // 傳遞背景速度給背景物件
+    // 4) 启动背景滚动
     m_Background.SetBackgroundSpeed(backgroundSpeed);
-
-    m_CurrentState = State::UPDATE;
+    m_BackgroundStarted = false;
+    // Logo 会在第一帧后自动滚出
 }
 
 void App::Render() {
@@ -67,9 +60,15 @@ void App::Render() {
     } else if (m_CurrentState == State::LEVEL2) {
         GameRender();
         m_Level2->Render();
+    } else if (m_CurrentState == State::LEVEL3) {
+        GameRender();
+        m_Level3->Render();
     } else if (m_CurrentState == State::LEVEL4) {
         GameRender();
         m_Level4->Render();
+    } else if (m_CurrentState == State::LEVEL5) {
+        GameRender();
+        m_Level5->Render();
     } else if (m_CurrentState == State::LEVEL6) {
         GameRender();
         m_Level6->Render();
@@ -79,6 +78,12 @@ void App::Render() {
     } else if (m_CurrentState == State::LEVEL8) {
         GameRender();
         m_Level8->Render();
+    } else if (m_CurrentState == State::LEVEL9) {
+        GameRender();
+        m_Level9->Render();
+    } else if (m_CurrentState == State::LEVEL10) {
+        GameRender();
+        m_Level10->Render();
     } else if (m_CurrentState == State::GAMEOVER) {
         // 1) 畫 total.png 全螢幕
         Util::Image totalImg(RESOURCE_DIR "/Image/GameOver/total.png");
@@ -194,16 +199,41 @@ void App::Render() {
 
         bool needDrawProgress = false;
 
-        if (m_CurrentLevelNumber == 4 && m_Level4) {
-            int  redCount = GetLevel4RedCount();
-            float dist4   = GetLevel4Distance();
+        if (m_CurrentLevelNumber == 3 && m_Level3) {
+            int  redCount = GetLevel3RedCount();
             line1->SetText("RED LIGHT: " + std::to_string(redCount) + "/10");
-            line2->SetText("DISTANCE: "  + std::to_string(static_cast<int>(dist4)) + "/500");
+            line2->SetText(" ");
             needDrawProgress = true;
-        }
-        else if (m_CurrentLevelNumber == 8 && m_Level8) {
+        } else if (m_CurrentLevelNumber == 4 && m_Level4) {
+            float raw = GetLevel4Distance();
+            int shown = std::min( static_cast<int>(raw), static_cast<int>(static_cast<Level4*>(m_Level4.get())->GetTargetDistance()) );
+            line1->SetText("DISTANCE: " + std::to_string(shown) + "/500");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 5 && m_Level5) {
+            float fd = static_cast<Level5*>(m_Level5.get())->GetCurrentFlightDistance();
+            line1->SetText("DISTANCE: " + std::to_string(static_cast<int>(fd)) + "/500");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 6 && m_Level6) {
+            int coins = static_cast<Level6*>(m_Level6.get())->GetCurrentCoinCount();
+            line1->SetText("COIN: " + std::to_string(coins) + "/" + std::to_string(Level6::kTargetCoins));
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 8 && m_Level8) {
             int  equipCount = GetLevel8EquipCount();
             line1->SetText("VEHICLE: " + std::to_string(equipCount) + "/2");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 9 && m_Level9) {
+            float cd = static_cast<Level9*>(m_Level9.get())->GetCurrentCeilingDistance();
+            line1->SetText("DISTANCE: " + std::to_string(static_cast<int>(cd)) + "/300");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 10 && m_Level10) {
+            float vd = static_cast<Level10*>(m_Level10.get())->GetCurrentVehicleDistance();
+            line1->SetText("DISTANCE: " + std::to_string(static_cast<int>(vd)) + "/700");
+            line2->SetText(" ");
             needDrawProgress = true;
         }
 
@@ -239,7 +269,7 @@ void App::Render() {
 
 void App::GameUpdate() {
     // 計算距離達到每 1000 米時增加背景速度
-    int distanceThreshold = 1000;  // 每 1000 米增加背景速度
+    int distanceThreshold = 300;  // 每 1000 米增加背景速度
     float speedIncrement = 0.5f;  // 每次增加的背景速度
 
     float playerDistance = m_Player->GetDistance();
@@ -258,6 +288,13 @@ void App::GameUpdate() {
 
     if (!m_BackgroundStarted && m_Logo.IsOffScreen()) {
         m_BackgroundStarted = true;
+
+        if (!m_BgmStarted) {
+            m_BGM.SetVolume(50);
+            m_BGM.Play(-1);
+            m_BgmStarted = true;
+        }
+
         m_Root.AddChild(m_CoinCounter);
         m_Root.AddChild(m_DistanceCounter);
         m_Root.AddChild(m_BestDistance);
@@ -308,20 +345,29 @@ void App::GameUpdate() {
                 break;
 
             case SpawnPhase::EQUIP:
+                // 如果玩家已经穿着装备，就跳过这一阶段
+                if (m_Player->IsWearingVehicle()) {
+                    // 直接重置 spawnPhase 到下一波障碍
+                    m_SpawnPhase            = SpawnPhase::ZAPPER;
+                    m_HasSpawnedCurrentWave = false;
+                    m_EquipSpawnedOnce      = false;
+                    // 重设下一轮波次数
+                    m_ZapperWavesLeft = 1;
+                    m_CoinWavesLeft   = 3;
+                    break;
+                }
+                // 正常的装备生成／移动逻辑
                 if (!m_EquipSpawnedOnce) {
-                    // 第一次进入 EQUIP 阶段，调用一次 spawn
-                    Equipment::UpdateEquipments(
+                     Equipment::UpdateEquipments(
                         EquipmentspawnInterval,
                         equipments,
                         m_Root,
                         backgroundSpeed
-                    );
-                    // 只要容器里 push 过一个，就认为 spawn 过了
-                    if (!equipments.empty()) {
+                     );
+                     if (!equipments.empty()) {
                         m_EquipSpawnedOnce = true;
-                    }
+                     }
                 } else {
-                    // 之后只更新位置并移除越界，不再 spawn
                     for (auto it = equipments.begin(); it != equipments.end(); ) {
                         auto& eq = *it;
                         eq->Update(backgroundSpeed);
@@ -333,7 +379,6 @@ void App::GameUpdate() {
                         }
                     }
                 }
-
                 // 所有装备都处理完毕后，回到下一轮 ZAPPER
                 if (m_EquipSpawnedOnce && equipments.empty()) {
                     m_SpawnPhase            = SpawnPhase::ZAPPER;
@@ -354,6 +399,7 @@ void App::GameUpdate() {
         );
 
         if (m_CollisionMgr->Update()) {
+            Mix_HaltChannel(-1);
             m_CurrentState = State::GAMEOVER;
         }
         m_CoinCounter->SetCount(m_CollisionMgr->GetCoinCount());
@@ -402,9 +448,21 @@ void App::ResetGame() {
 }
 
 void App::Update() {
-    // —— 1) 统一处理按 P 进入 Pause ——
-    if (m_CurrentLevel && Util::Input::IsKeyUp(Util::Keycode::P))
-    {
+    bool isInGameplay =
+       m_CurrentState == State::UPDATE
+    || m_CurrentState == State::LEVEL1
+    || m_CurrentState == State::LEVEL2
+    || m_CurrentState == State::LEVEL3
+    || m_CurrentState == State::LEVEL4
+    || m_CurrentState == State::LEVEL5
+    || m_CurrentState == State::LEVEL6
+    || m_CurrentState == State::LEVEL7
+    || m_CurrentState == State::LEVEL8
+    || m_CurrentState == State::LEVEL9
+    || m_CurrentState == State::LEVEL10;
+
+    if (isInGameplay && Util::Input::IsKeyUp(Util::Keycode::P)) {
+        Mix_Pause(-1);
         m_PreviousState = m_CurrentState;
         // 构造并启动暂停界面
         auto* md = static_cast<MissionDescription*>(m_MissionDesc.get());
@@ -438,6 +496,7 @@ void App::Update() {
         m_MissionDesc->Update();
         auto* md = static_cast<MissionDescription*>(m_MissionDesc.get());
         if (md->IsPlayChosen()) {
+            InitGame();
             m_CurrentLevelNumber = md->GetLevel();
             // 根據關卡編號實例化對應的關卡（目前只有第一關）
             if (m_CurrentLevelNumber == 1) {
@@ -450,12 +509,22 @@ void App::Update() {
                 m_Level2->Start();
                 m_CurrentState = State::LEVEL2;
                 m_CurrentLevel   = m_Level2.get();
-            } else if (m_CurrentLevelNumber == 4) {
+            } else if (m_CurrentLevelNumber == 3) {
+                m_Level3 = std::make_unique<Level3>(this);
+                m_Level3->Start();
+                m_CurrentState = State::LEVEL3;
+                m_CurrentLevel   = m_Level3.get();
+            }  else if (m_CurrentLevelNumber == 4) {
                 m_Level4 = std::make_unique<Level4>(this);
                 m_Level4->Start();
                 m_CurrentState = State::LEVEL4;
                 m_CurrentLevel   = m_Level4.get();
-            } else if (m_CurrentLevelNumber == 6) {
+            } else if (m_CurrentLevelNumber == 5) {
+                m_Level5 = std::make_unique<Level5>(this);
+                m_Level5->Start();
+                m_CurrentState = State::LEVEL5;
+                m_CurrentLevel   = m_Level5.get();
+            }  else if (m_CurrentLevelNumber == 6) {
                 m_Level6 = std::make_unique<Level6>(this);
                 m_Level6->Start();
                 m_CurrentState = State::LEVEL6;
@@ -470,9 +539,23 @@ void App::Update() {
                 m_Level8->Start();
                 m_CurrentState = State::LEVEL8;
                 m_CurrentLevel   = m_Level8.get();
+            }  else if (m_CurrentLevelNumber == 9) {
+                m_Level9 = std::make_unique<Level9>(this);
+                m_Level9->Start();
+                m_CurrentState = State::LEVEL9;
+                m_CurrentLevel   = m_Level9.get();
+            }  else if (m_CurrentLevelNumber == 10) {
+                m_Level10 = std::make_unique<Level10>(this);
+                m_Level10->Start();
+                m_CurrentState = State::LEVEL10;
+                m_CurrentLevel   = m_Level10.get();
             }
         } else if (md->IsReturnChosen()) {
-            // 点了 Back
+            if (m_BgmStarted) {
+                m_BGM.FadeOut(0);
+                m_BgmStarted = false;
+            }
+
             static_cast<LevelSelect*>(m_LevelSelect.get())->Start();
             m_CurrentState = State::LEVEL_SELECT;
         }
@@ -482,9 +565,15 @@ void App::Update() {
     } else if (m_CurrentState == State::LEVEL2) {
         GameUpdate();
         m_Level2->Update();
+    } else if (m_CurrentState == State::LEVEL3) {
+        GameUpdate();
+        m_Level3->Update();
     } else if (m_CurrentState == State::LEVEL4) {
         GameUpdate();
         m_Level4->Update();
+    } else if (m_CurrentState == State::LEVEL5) {
+        GameUpdate();
+        m_Level5->Update();
     } else if (m_CurrentState == State::LEVEL6) {
         GameUpdate();
         m_Level6->Update();
@@ -494,6 +583,12 @@ void App::Update() {
     } else if (m_CurrentState == State::LEVEL8) {
         GameUpdate();
         m_Level8->Update();
+    } else if (m_CurrentState == State::LEVEL9) {
+        GameUpdate();
+        m_Level9->Update();
+    } else if (m_CurrentState == State::LEVEL10) {
+        GameUpdate();
+        m_Level10->Update();
     } else if (m_CurrentState == State::UPDATE) {
         // 正常游戏模式
         GameUpdate();
@@ -501,13 +596,14 @@ void App::Update() {
         // 暂停界面
         m_PauseMenu->Update();
         if (m_PauseMenu->IsResumeChosen()) {
+            Mix_Resume(-1);
             // Resume 回去之前的状态
             m_CurrentState = m_PreviousState;
         } else if (m_PauseMenu->IsRetryChosen()) {
             m_Logo       = Logo();
             m_Background = Background();
 
-            ResetGame();
+            InitGame();
 
             switch (m_CurrentLevelNumber) {
                 case 1:
@@ -522,11 +618,23 @@ void App::Update() {
                     m_CurrentState = State::LEVEL2;
                     m_CurrentLevel = m_Level2.get();
                     break;
+                case 3:
+                    m_Level3 = std::make_unique<Level3>(this);
+                    m_Level3->Start();
+                    m_CurrentState = State::LEVEL3;
+                    m_CurrentLevel = m_Level3.get();
+                    break;
                 case 4:
                     m_Level4 = std::make_unique<Level4>(this);
                     m_Level4->Start();
                     m_CurrentState = State::LEVEL4;
                     m_CurrentLevel = m_Level4.get();
+                    break;
+                case 5:
+                    m_Level5 = std::make_unique<Level5>(this);
+                    m_Level5->Start();
+                    m_CurrentState = State::LEVEL5;
+                    m_CurrentLevel = m_Level5.get();
                     break;
                 case 6:
                     m_Level6 = std::make_unique<Level6>(this);
@@ -546,8 +654,24 @@ void App::Update() {
                     m_CurrentState = State::LEVEL8;
                     m_CurrentLevel = m_Level8.get();
                     break;
+                case 9:
+                    m_Level9 = std::make_unique<Level9>(this);
+                    m_Level9->Start();
+                    m_CurrentState = State::LEVEL9;
+                    m_CurrentLevel = m_Level9.get();
+                    break;
+                case 10:
+                    m_Level10 = std::make_unique<Level10>(this);
+                    m_Level10->Start();
+                    m_CurrentState = State::LEVEL10;
+                    m_CurrentLevel = m_Level10.get();
+                    break;
             }
         } else if (m_PauseMenu->IsQuitChosen()) {
+            if (m_BgmStarted) {
+                m_BGM.FadeOut(0);
+                m_BgmStarted = false;
+            }
             // Quit → 回任务说明
             m_Logo       = Logo();
             m_Background = Background();
@@ -587,7 +711,7 @@ void App::Update() {
             m_Logo       = Logo();
             m_Background = Background();
 
-            ResetGame();
+            InitGame();
 
             switch (m_CurrentLevelNumber) {
                 case 1:
@@ -602,11 +726,23 @@ void App::Update() {
                     m_CurrentState = State::LEVEL2;
                     m_CurrentLevel = m_Level2.get();
                     break;
+                case 3:
+                    m_Level3 = std::make_unique<Level3>(this);
+                    m_Level3->Start();
+                    m_CurrentState = State::LEVEL3;
+                    m_CurrentLevel = m_Level3.get();
+                    break;
                 case 4:
                     m_Level4 = std::make_unique<Level4>(this);
                     m_Level4->Start();
                     m_CurrentState = State::LEVEL4;
                     m_CurrentLevel = m_Level4.get();
+                    break;
+                case 5:
+                    m_Level5 = std::make_unique<Level5>(this);
+                    m_Level5->Start();
+                    m_CurrentState = State::LEVEL5;
+                    m_CurrentLevel = m_Level5.get();
                     break;
                 case 6:
                     m_Level6 = std::make_unique<Level6>(this);
@@ -626,6 +762,18 @@ void App::Update() {
                     m_CurrentState = State::LEVEL8;
                     m_CurrentLevel = m_Level8.get();
                     break;
+                case 9:
+                    m_Level9 = std::make_unique<Level9>(this);
+                    m_Level9->Start();
+                    m_CurrentState = State::LEVEL9;
+                    m_CurrentLevel = m_Level9.get();
+                    break;
+                case 10:
+                    m_Level10 = std::make_unique<Level10>(this);
+                    m_Level10->Start();
+                    m_CurrentState = State::LEVEL10;
+                    m_CurrentLevel = m_Level10.get();
+                    break;
             }
         }
         {
@@ -637,6 +785,10 @@ void App::Update() {
             bool overQuit2 = quitMp2.x>=quitPos2.x && quitMp2.x<=quitPos2.x+quitSize2.x
                                       && quitMp2.y>=quitPos2.y && quitMp2.y<=quitPos2.y+quitSize2.y;
             if (quitUp && overQuit2) {
+                if (m_BgmStarted) {
+                    m_BGM.FadeOut(0);
+                    m_BgmStarted = false;
+                }
                 // 先重置整個遊戲狀態
                 m_Logo       = Logo();
                 m_Background = Background();
@@ -665,9 +817,9 @@ PauseMenu* App::GetPauseMenu() {
     return m_PauseMenu.get();
 }
 
-int App::GetLevel4RedCount() const {
-    if (m_Level4) {
-        return m_Level4->GetRedTouchedCount();
+int App::GetLevel3RedCount() const {
+    if (m_Level3) {
+        return m_Level3->GetRedTouchedCount();
     }
     return 0;
 }

@@ -13,10 +13,15 @@ public:
     void Render() override;
 
     bool IsCompleted() const override { return m_Completed; }
+    int  GetCurrentCoinCount() const { return m_CurrentCoinCount; }
+    static constexpr int kTargetCoins = 50;
 private:
     App* m_App;
-    float m_TargetLeastDistance = 1000.0f;
-    float m_TargetMostDistance = 1300.0f;
+    static constexpr float kStartDistance = 800.0f;
+    static constexpr float kEndDistance   = 1500.0f;
+    float m_StartDistance   = -1.0f;
+    int   m_StartCoinCount  = 0;
+    int   m_CurrentCoinCount = 0;
     bool m_Completed = false;
 };
 

@@ -1,65 +1,49 @@
 #include "Level4.hpp"
 #include "App.hpp"
-#include "Background.hpp"
-#include "Player.hpp"
-
-#include "Util/Text.hpp"
-#include "Util/TransformUtils.hpp"
+#include "Util/Keycode.hpp"
+#include "Util/Input.hpp"
 
 Level4::Level4(App* app)
   : m_App(app)
-{}
+{ }
 
 void Level4::Start() {
+    // 1) 启动游戏主循环（初始化背景、玩家、碰撞管理等）
     m_App->Start();
 
-    Background* bg = m_App->GetBackground();
-    auto bounds = bg->GetRedLightBounds();
-    m_PrevCollided.assign(bounds.size(), false);
-
-    m_RedTouchedCount = 0;
-    m_Completed       = false;
+    // 2) 重置进度
+    m_LastPlayerWalkDist   = 0.0f;
+    m_CurrentWalkDistance  = 0.0f;
+    m_Completed            = false;
 }
 
 void Level4::Update() {
     if (m_Completed) return;
 
-    Background* bg  = m_App->GetBackground();
-    Player*     ply = m_App->GetPlayer();
+    // 1) 从 Player 拿到“总步行距离”
+    float totalWalk = m_App->GetPlayer()->GetWalkDistance();
 
-    auto bounds = bg->GetRedLightBounds();
-    size_t n = bounds.size();
-    if (m_PrevCollided.size() != n) {
-        m_PrevCollided.assign(n, false);
-    }
+    // 2) 判断玩家是否处于“贴地面”或“贴天花板”状态
+    bool onGroundOrCeiling =
+        m_App->GetPlayer()->IsOnGround()
+     || m_App->GetPlayer()->IsOnCeiling();
 
-    glm::vec2 pPos  = ply->GetPosition();
-    glm::vec2 pSize = ply->GetSize();
-
-    for (size_t i = 0; i < n; ++i) {
-        const auto& [rPos, rSize] = bounds[i];
-        bool collidingNow = !(
-            (pPos.x + pSize.x) < rPos.x ||
-            (rPos.x + rSize.x) < pPos.x ||
-            (pPos.y + pSize.y) < rPos.y ||
-            (rPos.y + rSize.y) < pPos.y
-        );
-
-        if (collidingNow && !m_PrevCollided[i]) {
-            m_RedTouchedCount++;
-            m_PrevCollided[i] = true;
-        }
-        else if (!collidingNow) {
-            m_PrevCollided[i] = false;
+    // 3) 只有在“贴地/贴顶”时才累计步行距离的增量
+    if (onGroundOrCeiling) {
+        float delta = totalWalk - m_LastPlayerWalkDist;
+        if (delta > 0.0f) {
+            m_CurrentWalkDistance += delta;
         }
     }
 
-    float walkDist = m_App->GetDistance();
+    // 4) 更新上一帧的总步行里程
+    m_LastPlayerWalkDist = totalWalk;
 
-    if (m_RedTouchedCount >= m_TargetRedLight && walkDist >= m_TargetDistance) {
+    // 5) 判断是否达标
+    if (m_CurrentWalkDistance >= m_TargetDistance) {
+        m_CurrentWalkDistance = m_TargetDistance;
         m_Completed = true;
     }
 }
 
-void Level4::Render() {
-}
+void Level4::Render() {}

@@ -11,19 +11,39 @@ Level6::Level6(App* app)
 {}
 
 void Level6::Start() {
-    // 初始化關卡
     m_App->Start();
-    // 可自訂 UI、文字
+
+    m_StartDistance    = -1.0f;
+    m_StartCoinCount   = m_App->GetCollisionManager()->GetCoinCount();
+    m_CurrentCoinCount = 0;
+    m_Completed        = false;
 }
 
 void Level6::Update() {
-    // 檢查完成條件
-    float dist = m_App->GetDistance();  // 或者你加個 App::GetDistance()
-    if (!m_Completed && (dist >= m_TargetLeastDistance && dist <= m_TargetMostDistance)) {
-        m_Completed = true;
+    if (m_Completed) return;
+
+    float dist = m_App->GetDistance();
+    int   totalCoins = m_App->GetCollisionManager()->GetCoinCount();
+
+    // 还没开始计数，等玩家跑到 1000m
+    if (dist < kStartDistance) return;
+
+    // 第一次到达 1000m，记录初始金币数
+    if (m_StartDistance < 0.0f) {
+        m_StartDistance  = dist;
+        m_StartCoinCount = totalCoins;
+    }
+
+    // 在 [1000,1300]m 区间内，更新当前区间内的金币数
+    if (dist <= kEndDistance) {
+        m_CurrentCoinCount = totalCoins - m_StartCoinCount;
+        if (m_CurrentCoinCount < 0) m_CurrentCoinCount = 0;
+        if (m_CurrentCoinCount > kTargetCoins) m_CurrentCoinCount = kTargetCoins;
+        // 足够则完成
+        if (m_CurrentCoinCount >= kTargetCoins) {
+            m_Completed = true;
+            }
     }
 }
 
-void Level6::Render() {
-    // empty: 第二關暫時不需額外畫面
-}
+void Level6::Render() {}
