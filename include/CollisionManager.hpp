@@ -6,7 +6,7 @@
 #include "Player.hpp"
 #include "ZapperManager.hpp"
 #include "CoinManager.hpp"
-#include "Missile.hpp"
+#include "missile.hpp"
 #include "Equipment.hpp"
 #include "Util/SFX.hpp"
 #include <Util/Renderer.hpp>

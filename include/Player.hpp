@@ -52,6 +52,20 @@ public:
     bool HasLilStomper() const { return hasLilStomper; }
 
     float GetWalkDistance() const { return m_WalkDistance; }
+
+    bool IsOnGround() const {
+        float y = GetPosition().y;
+        return y <= groundPosition.y + 1e-2f;
+    }
+
+    bool IsOnCeiling() const {
+        // 只有當玩家有 Gravity Suit，且 state==AtTop（貼著天花板）時才算
+        return hasGravitySuit && state == PlayerState::AtTop;
+    }
+
+    bool IsWearingVehicle() const {
+        return hasGravitySuit || hasLilStomper;
+    }
 private:
     std::shared_ptr<Animation> runAnimation;
     std::shared_ptr<Animation> flyAnimation;
@@ -80,11 +94,6 @@ private:
     int lastFrameIndex = -1;
 
     float m_WalkDistance = 0.0f;
-
-    bool IsOnGround() const {
-        float y = GetPosition().y;
-        return y <= groundPosition.y + 1e-2f;
-    }
 };
 
 #endif

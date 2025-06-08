@@ -52,8 +52,8 @@ add_executable(${PROJECT_NAME}
         include/ZapperManager.hpp
         src/Zapper.cpp
         src/ZapperManager.cpp
-        include/missile.hpp
-        src/missile.cpp
+        include/Missile.hpp
+        src/Missile.cpp
         include/Equipment.hpp
         src/Equipment.cpp
         include/CollisionManager.hpp
@@ -88,6 +88,14 @@ add_executable(${PROJECT_NAME}
         include/Level6.hpp
         src/Level4.cpp
         src/Level6.cpp
+        src/Level3.cpp
+        src/Level5.cpp
+        src/Level9.cpp
+        src/Level10.cpp
+        include/Level3.hpp
+        include/Level5.hpp
+        include/Level9.hpp
+        include/Level10.hpp
 )
 
 if(MSVC)

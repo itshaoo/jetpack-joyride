@@ -10,7 +10,7 @@
 #include "Animation.hpp"
 #include "ZapperManager.hpp"
 #include "CoinManager.hpp"
-#include "Missile.hpp"
+#include "missile.hpp"
 #include "Equipment.hpp"
 #include "CollisionManager.hpp"
 #include "CoinCounter.hpp"
@@ -19,10 +19,14 @@
 #include "ILevel.hpp"
 #include "Level1.hpp"
 #include "Level2.hpp"
+#include "Level3.hpp"
 #include "Level4.hpp"
+#include "Level5.hpp"
 #include "Level6.hpp"
 #include "Level7.hpp"
 #include "Level8.hpp"
+#include "Level9.hpp"
+#include "Level10.hpp"
 #include "LevelSelect.hpp"
 #include "MissionDescription.hpp"
 #include "PauseMenu.hpp"
@@ -38,10 +42,14 @@ public:
         MISSION_DESCRIPTION,
         LEVEL1,
         LEVEL2,
+        LEVEL3,
         LEVEL4,
+        LEVEL5,
         LEVEL6,
         LEVEL7,
         LEVEL8,
+        LEVEL9,
+        LEVEL10,
         START,
         UPDATE,
         PAUSED,
@@ -51,12 +59,13 @@ public:
 
     enum class SpawnPhase { ZAPPER, COIN, EQUIP};
 
-    App();               // 新增建構子
+    App();
     ~App() = default;
 
     State GetCurrentState() const { return m_CurrentState; }
 
-    void Start();
+    void InitGame();
+    void Start() {InitGame(); m_CurrentState = State::UPDATE; };
     void Update();
     void Render();
     void End();
@@ -72,7 +81,7 @@ public:
     Player*     GetPlayer()     { return m_Player.get();  }
 
     // 返回第四关当前已触碰红灯数量（0~10）
-    int GetLevel4RedCount() const;
+    int GetLevel3RedCount() const;
     // 返回第四关的目标步行距离（500）与当前距离
     float GetLevel4Distance() const;
 
@@ -87,10 +96,14 @@ private:
     ILevel* m_CurrentLevel = nullptr;
     std::unique_ptr<Level1> m_Level1;
     std::unique_ptr<Level2> m_Level2;
+    std::unique_ptr<Level3> m_Level3;
     std::unique_ptr<Level4> m_Level4;
+    std::unique_ptr<Level5> m_Level5;
     std::unique_ptr<Level6> m_Level6;
     std::unique_ptr<Level7> m_Level7;
     std::unique_ptr<Level8> m_Level8;
+    std::unique_ptr<Level9> m_Level9;
+    std::unique_ptr<Level10> m_Level10;
     int m_CurrentLevelNumber = 1;
 
     Logo m_Logo;
@@ -136,6 +149,9 @@ private:
     int m_CoinWavesLeft = 2;
     bool      m_HasSpawnedCurrentWave;
     bool m_EquipSpawnedOnce = false;
+
+    Util::BGM m_BGM{RESOURCE_DIR "/Sounds/background_music.wav"};
+    bool      m_BgmStarted = false;
 
     void GameUpdate();   // 每帧更新背景、玩家、障碍、金币、碰撞……（原 UPDATE 分支内容）
     void GameRender();   // 每帧绘制背景、玩家、障碍、金币等，及暂停覆盖（原 Render 中 default 分支内容）

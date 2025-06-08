@@ -291,3 +291,42 @@ std::vector<std::pair<glm::vec2, glm::vec2>> Background::GetRedLightBounds() con
     }
     return result;
 }
+
+std::pair<glm::vec2, glm::vec2> Background::GetInitialRedLightBounds() const {
+    // 只有 INITIAL 階段上才會有這張紅燈
+    if (m_Phase != Phase::INITIAL) {
+        return { {0.0f, 0.0f}, {0.0f, 0.0f} };
+    }
+
+    // 1) 先拿到 start.png（m_InitialImages[0]）的尺寸
+    const Util::Image& startImg = m_InitialImages[0];
+    auto origSize = startImg.GetSize(); // (width, height)
+
+    // 2) start.png 被縮放到整個窗口
+    float scaleX = static_cast<float>(WINDOW_WIDTH)  / origSize.x;
+    float scaleY = static_cast<float>(WINDOW_HEIGHT) / origSize.y;
+
+    // 3) 初始畫面上，紅燈是 m_StartOverlays[3]
+    //    在 renderInitial() 裡，它的 offset 定義為 overlayOffsets[3]
+    //    overlayOffsets[3] = {250.0f, 150.0f}（相對 start.png 左下角）。
+    //
+    //    而它的 scale = start 的 scale * overlayScales[3]，
+    //    overlayScales[3] 在 renderInitial() 是 0.6。
+    float overlayScale = 0.6f;
+    glm::vec2 overlayOffset = {250.0f, 150.0f};
+
+    // 4) 加上當前背景位移 m_ScrollX，才是正確的世界座標
+    float posX = m_ScrollX /* ＝ transform.translation.x */;
+    glm::vec2 worldPos = { posX + overlayOffset.x, overlayOffset.y };
+
+    // 5) 計算紅燈原始尺寸
+    const Util::Image& redImg = m_StartOverlays[3];
+    auto redOrigSize = redImg.GetSize(); // (width, height)
+
+    // 6) 紅燈實際繪製尺寸 = redOrigSize * overlayScale * (後續 X/Y 再乘 scaleX/scaleY)
+    //    先算「紅燈在原始 start.png 座標下，放大 overlayScale 後」的尺寸：
+    glm::vec2 scaledOverlay = { redOrigSize.x * overlayScale, redOrigSize.y * overlayScale };
+    //    最後畫到畫面上時，整張 start.png 又被縮放了 scaleX、scaleY，因此：
+    glm::vec2 worldSize = { scaledOverlay.x * scaleX, scaledOverlay.y * scaleY };
+    return { worldPos, worldSize };
+}

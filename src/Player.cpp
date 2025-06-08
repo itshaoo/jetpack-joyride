@@ -302,7 +302,7 @@ void Player::Update() {
     // 累積移動距離
     m_Distance += speed * (Util::Time::GetDeltaTimeMs() / 500.0f);
 
-    if (IsOnGround()) {
+    if (IsOnGround() || IsOnCeiling()) {
         m_WalkDistance += speed * (Util::Time::GetDeltaTimeMs() / 500.0f);
     }
     // 更新按鍵狀態紀錄

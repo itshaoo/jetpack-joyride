@@ -10,7 +10,7 @@ GravitySuit::GravitySuit() {
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_2_0.png",
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_2_1.png"
     };
-    runAnimation = std::make_shared<Animation>(runPaths);
+    runAnimation = std::make_shared<Animation>(runPaths, /*z=*/5.0f);
     runAnimation->SetLooping(true);
     runAnimation->SetInterval(100);
     runAnimation->Play();
@@ -20,7 +20,7 @@ GravitySuit::GravitySuit() {
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_2_2.png",
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_3_2.png"
     };
-    flyAnimation = std::make_shared<Animation>(flyPaths);
+    flyAnimation = std::make_shared<Animation>(flyPaths, /*z=*/5.0f);
     flyAnimation->SetLooping(false);
     flyAnimation->SetInterval(120);
     flyAnimation->Play();
@@ -31,7 +31,7 @@ GravitySuit::GravitySuit() {
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_2_1.png",
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_3_1.png"
     };
-    fallAnimation = std::make_shared<Animation>(fallPaths);
+    fallAnimation = std::make_shared<Animation>(fallPaths, /*z=*/5.0f);
     fallAnimation->SetLooping(false);
     fallAnimation->SetInterval(100);
     fallAnimation->Play();
@@ -40,7 +40,7 @@ GravitySuit::GravitySuit() {
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_3_2.png",
         RESOURCE_DIR"/Image/Vehicle/gravity_suit/sprite_3_3.png"
     };
-    topAnimation = std::make_shared<Animation>(topPaths);
+    topAnimation = std::make_shared<Animation>(topPaths, /*z=*/5.0f);
     topAnimation->SetLooping(true);
     topAnimation->SetInterval(100);
     topAnimation->Play();

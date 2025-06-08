@@ -11,8 +11,8 @@ class CoinManager {
 public:
     CoinManager(Util::Renderer* renderer,
                 float bgSpeed,
-                float minY = -230.0f,   // groundPosition.y
-                float maxY =  230.0f);
+                float minY = -215.0f,   // groundPosition.y
+                float maxY =  215.0f);
     void Update(float backgroundSpeed);
 
     std::vector<std::shared_ptr<Coin>>& GetCoins() { return m_Coins; }
