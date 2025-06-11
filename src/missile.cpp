@@ -142,3 +142,7 @@ void Missile::Update(float deltaTime) {
         missileAnimation->SetVisible(true);
     }
 }
+
+void Missile::SetSpeed(float speed) {
+    m_Speed = m_BaseSpeed + speed;
+}

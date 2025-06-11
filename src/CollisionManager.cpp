@@ -1,20 +1,24 @@
 #include "CollisionManager.hpp"
+#include "App.hpp"
 #include <iostream>
 
 CollisionManager::CollisionManager(
+    App* app,
     Player* player,
     ZapperManager* zapperMgr,
     CoinManager* coinMgr,
     std::vector<std::shared_ptr<Missile>>& missiles,
     std::vector<std::shared_ptr<Equipment>>& equipments,
     Util::Renderer* renderer
-) : m_Player(player)
-  , m_ZapperMgr(zapperMgr)
-  , m_CoinMgr(coinMgr)
-  , m_Missiles(missiles)
-  , m_Equipments(equipments)
-  , m_CoinCount(0)
-  , m_Renderer(renderer)
+)
+    : m_App(app), // 新增
+      m_Player(player),
+      m_ZapperMgr(zapperMgr),
+      m_CoinMgr(coinMgr),
+      m_Missiles(missiles),
+      m_Equipments(equipments)
+      , m_CoinCount(0)
+      , m_Renderer(renderer)
 {
     // 初始化金幣音效
     m_CoinSound = std::make_shared<Util::SFX>(std::string(RESOURCE_DIR) + "/Sounds/coin_pickup.wav");
@@ -63,8 +67,11 @@ bool CollisionManager::Update() {
                 m_ZapperMgr->RemoveZapper(zap);
                 it = m_ZapperMgr->GetZappers().begin();
                 continue;
+            } else if (m_App->IsGodMode()) { // 新增這一行
+                std::cout << "GodMode active, ignore collision" << std::endl;
+                ++it;
+                continue;
             } else {
-                std::cout << "Player hit Zapper\n";
                 return true;
             }
         }
@@ -90,8 +97,11 @@ bool CollisionManager::Update() {
                 continue;
             }
             // Fix: add missing closing brace for else-if
+            } else if (m_App->IsGodMode()) { // 新增這一行
+                // 無敵模式，什麼都不做
+                ++it;
+                continue;
             } else {
-                std::cout << "Player hit Missile\n";
                 return true;
             }
         }
@@ -137,21 +147,24 @@ bool CollisionManager::Update() {
         auto& eq = *it;
         if (CheckAABB(pPos, pSize, eq->GetPosition(), eq->GetSize())) {
             std::cout << "Player touched Equipment\n";
-            // 隨機選擇一種裝備
-            if (std::rand() % 2 == 0) {
+            // 只在第9關強制給Gravity Suit，其餘隨機
+            if (m_App->GetCurrentLevelNumber() == 9) {
                 m_Player->EnableGravitySuit();
             } else {
-                m_Player->EnableLilStomper();
+                if (std::rand() % 2 == 0) {
+                    m_Player->EnableGravitySuit();
+                } else {
+                    m_Player->EnableLilStomper();
+                }
             }
             if (m_Renderer) {
                 m_Renderer->RemoveChild(eq->equipmentAnimation);
             }
             it = m_Equipments.erase(it);
-            ++m_EquipCount;
+            continue;
         } else {
             ++it;
         }
-        return false;
     }
 
     for (auto it = m_ShineAnims.begin(); it != m_ShineAnims.end(); ) {

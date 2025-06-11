@@ -87,6 +87,9 @@ public:
 
     // 返回第八关当前已收集装备数量（0~2）
     int GetLevel8EquipCount() const;
+    bool IsGodMode() const { return m_GodMode; }
+    int GetCurrentLevelNumber() const { return m_CurrentLevelNumber; }
+    
 private:
     State m_CurrentState = State::LEVEL_SELECT;
     State m_PreviousState = State::UPDATE;
@@ -155,6 +158,8 @@ private:
 
     void GameUpdate();   // 每帧更新背景、玩家、障碍、金币、碰撞……（原 UPDATE 分支内容）
     void GameRender();   // 每帧绘制背景、玩家、障碍、金币等，及暂停覆盖（原 Render 中 default 分支内容）
+
+    bool m_GodMode = false; // 無敵模式
 };
 
 #endif

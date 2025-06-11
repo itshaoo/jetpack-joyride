@@ -15,6 +15,7 @@
 class CollisionManager {
 public:
     CollisionManager(
+        App* app, // 新增
         Player* player,
         ZapperManager* zapperMgr,
         CoinManager* coinMgr,
@@ -31,6 +32,8 @@ public:
     int GetEquipmentCount() const { return m_EquipCount; }
 
 private:
+    App* m_App; // 新增
+
     // 收縮後的 AABB 碰撞檢測
     bool CheckAABB(
         glm::vec2 posA, glm::vec2 sizeA,

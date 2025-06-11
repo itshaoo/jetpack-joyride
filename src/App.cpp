@@ -33,6 +33,7 @@ void App::InitGame() {
     m_Player->AddToRenderer(m_Root);
 
     m_CollisionMgr = std::make_unique<CollisionManager>(
+        this, // 新增
         m_Player.get(),
         &m_ZapperManager,
         &m_CoinManager,
@@ -280,6 +281,16 @@ void App::GameUpdate() {
     // 計算背景速度增量
     backgroundSpeed = 4.0f + distanceThresholdsCrossed * speedIncrement;
 
+    // ====== 新增：按下 S 鍵時加速 ======
+    if (Util::Input::IsKeyPressed(Util::Keycode::LSHIFT)) {
+        backgroundSpeed *= 2.5; // 你可以調整倍率
+    }
+    
+    if(m_Player->HasLilStomper()) {
+        // 如果玩家有 Lil Stomper，背景速度增加一倍
+        backgroundSpeed *= 2;
+    }
+    
     // 更新背景速度
     m_Background.SetBackgroundSpeed(backgroundSpeed);
 
@@ -398,6 +409,13 @@ void App::GameUpdate() {
             m_Player->GetPosition()
         );
 
+        // 更新所有飛彈速度，使其與背景速度同步
+        for (auto& missile : m_Missiles) {
+            if (missile) {
+                missile->SetSpeed(backgroundSpeed);
+            }
+        }
+
         if (m_CollisionMgr->Update()) {
             Mix_HaltChannel(-1);
             m_CurrentState = State::GAMEOVER;
@@ -448,6 +466,102 @@ void App::ResetGame() {
 }
 
 void App::Update() {
+    // ====== 新增：數字鍵跳關（不影響原有功能）======
+    if (m_CurrentState == State::LEVEL1 || m_CurrentState == State::LEVEL2 ||
+        m_CurrentState == State::LEVEL3 || m_CurrentState == State::LEVEL4 ||
+        m_CurrentState == State::LEVEL5 || m_CurrentState == State::LEVEL6 ||
+        m_CurrentState == State::LEVEL7 || m_CurrentState == State::LEVEL8 ||
+        m_CurrentState == State::LEVEL9 || m_CurrentState == State::LEVEL10) {
+        for (int i = 0; i < 10; ++i) {
+            Util::Keycode key = static_cast<Util::Keycode>(static_cast<int>(Util::Keycode::NUM_1) + i);
+            if (Util::Input::IsKeyPressed(key)) {
+                int targetLevel = (i == 9) ? 10 : (i + 1);
+                m_CurrentLevelNumber = targetLevel;
+                m_Logo       = Logo();         // 新增：重建 Logo
+                m_Background = Background();   // 新增：重建背景
+                m_BackgroundStarted = false;   // 新增：強制從 Logo 開始
+                InitGame();
+                switch (targetLevel) {
+                    case 1:
+                        std::cout << "Switching to Level 1" << std::endl;
+                        m_Level1 = std::make_unique<Level1>(this);
+                        m_Level1->Start();
+                        m_CurrentState = State::LEVEL1;
+                        m_CurrentLevel = m_Level1.get();
+                        break;
+                    case 2:
+                        std::cout << "Switching to Level 2" << std::endl;
+                        m_Level2 = std::make_unique<Level2>(this);
+                        m_Level2->Start();
+                        m_CurrentState = State::LEVEL2;
+                        m_CurrentLevel = m_Level2.get();
+                        break;
+                    case 3:
+                        std::cout << "Switching to Level 3" << std::endl;
+                        m_Level3 = std::make_unique<Level3>(this);
+                        m_Level3->Start();
+                        m_CurrentState = State::LEVEL3;
+                        m_CurrentLevel = m_Level3.get();
+                        break;
+                    case 4:
+                        std::cout << "Switching to Level 4" << std::endl;
+                        m_Level4 = std::make_unique<Level4>(this);
+                        m_Level4->Start();
+                        m_CurrentState = State::LEVEL4;
+                        m_CurrentLevel = m_Level4.get();
+                        break;
+                    case 5:
+                        std::cout << "Switching to Level 5" << std::endl;
+                        m_Level5 = std::make_unique<Level5>(this);
+                        m_Level5->Start();
+                        m_CurrentState = State::LEVEL5;
+                        m_CurrentLevel = m_Level5.get();
+                        break;
+                    case 6:
+                        std::cout << "Switching to Level 6" << std::endl;
+                        m_Level6 = std::make_unique<Level6>(this);
+                        m_Level6->Start();
+                        m_CurrentState = State::LEVEL6;
+                        m_CurrentLevel = m_Level6.get();
+                        break;
+                    case 7:
+                        std::cout << "Switching to Level 7" << std::endl;
+                        m_Level7 = std::make_unique<Level7>(this);
+                        m_Level7->Start();
+                        m_CurrentState = State::LEVEL7;
+                        m_CurrentLevel = m_Level7.get();
+                        break;
+                    case 8:
+                        std::cout << "Switching to Level 8" << std::endl;
+                        m_Level8 = std::make_unique<Level8>(this);
+                        m_Level8->Start();
+                        m_CurrentState = State::LEVEL8;
+                        m_CurrentLevel = m_Level8.get();
+                        break;
+                    case 9:
+                        std::cout << "Switching to Level 9" << std::endl;
+                        m_Level9 = std::make_unique<Level9>(this);
+                        m_Level9->Start();
+                        m_CurrentState = State::LEVEL9;
+                        m_CurrentLevel = m_Level9.get();
+                        break;
+                    case 10:
+                        std::cout << "Switching to Level 10" << std::endl;
+                        m_Level10 = std::make_unique<Level10>(this);
+                        m_Level10->Start();
+                        m_CurrentState = State::LEVEL10;
+                        m_CurrentLevel = m_Level10.get();
+                        break;
+                }
+                return;
+            }
+        }
+    }
+    // Tab 切換無敵模式
+    if (Util::Input::IsKeyUp(Util::Keycode::TAB)) {
+        m_GodMode = !m_GodMode;
+        std::cout << "GodMode: " << (m_GodMode ? "ON" : "OFF") << std::endl;
+    }
     bool isInGameplay =
        m_CurrentState == State::UPDATE
     || m_CurrentState == State::LEVEL1

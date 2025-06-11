@@ -19,6 +19,7 @@ public:
 
     void Update(float deltaTime);
     bool IsOffScreen() const;
+    void SetSpeed(float speed);
 
     static void UpdateMissiles(float spawnInterval,
                                std::vector<std::shared_ptr<Missile>>& missiles,
@@ -36,7 +37,8 @@ private:
     float m_TrackingTime = 1000.0f; 
     float m_TrackingTimer = 0.0f;
 
-    float m_Speed = 15.0f;
+    float m_Speed = 11.0f;      // 飛彈目前速度
+    float m_BaseSpeed = 11.0f;  // 飛彈原始速度
     bool m_Launched = false;
     std::shared_ptr<Util::SFX> missileSound;
     std::shared_ptr<Util::SFX> warningSound;
