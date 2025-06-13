@@ -67,7 +67,6 @@ add_executable(${PROJECT_NAME}
         include/BestDistance.hpp
         include/DistanceCounter.hpp
         include/ILevel.hpp
-        include/Level.hpp
         include/Level1.hpp
         include/Level2.hpp
         include/Level7.hpp
@@ -84,6 +83,18 @@ add_executable(${PROJECT_NAME}
         src/PauseMenu.cpp
         include/Level8.hpp
         src/Level8.cpp
+        include/Level3.hpp
+        include/Level4.hpp
+        include/Level5.hpp
+        include/Level6.hpp
+        include/Level9.hpp
+        include/Level10.hpp
+        src/Level3.cpp
+        src/Level4.cpp
+        src/Level5.cpp
+        src/Level6.cpp
+        src/Level9.cpp
+        src/Level10.cpp
 )
 
 if(MSVC)

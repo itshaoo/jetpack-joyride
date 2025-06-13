@@ -16,7 +16,8 @@
 enum class PlayerState {
     Running,      // 地面行走動畫
     FlyingUp,     // 飛上去動畫
-    AtTop,        // 停在最高點，等待按 SPACE 才會掉下來
+    AtTop,
+    Hover,// 停在最高點，等待按 SPACE 才會掉下來
     FallingDown   // 掉落動畫
 };
 
@@ -51,6 +52,25 @@ public:
     bool HasGravitySuit() const { return hasGravitySuit; }
     bool HasLilStomper() const { return hasLilStomper; }
 
+    float GetWalkDistance() const { return m_WalkDistance; }
+
+    bool IsOnGround() const {
+        float y = GetPosition().y;
+        return y <= groundPosition.y + 1e-2f;
+    }
+
+    bool IsOnCeiling() const {
+        // 只有當玩家有 Gravity Suit，且 state==AtTop（貼著天花板）時才算
+        return hasGravitySuit && state == PlayerState::AtTop;
+    }
+
+    bool IsWearingVehicle() const {
+        return hasGravitySuit || hasLilStomper;
+    }
+
+    void StartRunningAnimation() {
+        runAnimation->Play();
+    }
 private:
     std::shared_ptr<Animation> runAnimation;
     std::shared_ptr<Animation> flyAnimation;
@@ -77,6 +97,12 @@ private:
     float m_Distance = 0.0f;
 
     int lastFrameIndex = -1;
+
+    float m_WalkDistance = 0.0f;
+
+    float m_VerticalVelocity = 0.0f;
+
+    float m_HoldTimer = 0.0f;
 };
 
 #endif

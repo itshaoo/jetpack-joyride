@@ -1,6 +1,3 @@
-//
-// Created by hao on 2025/3/14.
-//
 #include "Object.hpp"
 #include "Util/Image.hpp"
 

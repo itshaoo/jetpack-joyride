@@ -27,6 +27,4 @@ void Level1::Update() {
     }
 }
 
-void Level1::Render() {
-    // empty: 第一關暫時不需額外畫面
-}
+void Level1::Render() {}

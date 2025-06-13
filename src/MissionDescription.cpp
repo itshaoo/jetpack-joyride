@@ -19,14 +19,14 @@ MissionDescription::MissionDescription(int level)
     static const std::vector<std::string> missions = {
         "COLLECT 150 COINS.",
         "REACH 1000M.",
-        "HIVE FIVE 10 NUMBER OF SCIENTISTS AND COLLECT 500 COINS.",
-        "BRUSH PAST 10 NUMBER OF RED FLASHING LIGHTS IN ONE GAME AND COVER 500M ON FOOT.",
-        "COLLECT 2 SPIN TOKENS.",
-        "FINISH A GAME BETWEEN 1000M AND 1300M.",
+        "BRUSH PAST 10 NUMBER OF RED FLASHING LIGHTS.",
+        "COVER 500M ON FOOT.",
+        "FLY WITHOUT TOUCHING THE GROUND FOR 500M.",
+        "COLLECT 50 COINS BETWEEN 800M AND 1500M.",
         "REACH 1000M WITHOUT COLLECTING ANY COINS.",
         "COLLECT 2 VEHICLES.",
-        "HAVE A NEAR MISS WITH 5 MISSILES.",
-        "HAVE A NEAR MISS WITH 5 MISSILES AND HAVE A NEAR MISS WITH 5 ZAPPERS."
+        "USE GRAVITY SUIT TO WALK ON THE CEILING FOR 300M.",
+        "WEAR THE VEHICLE AND COVER 700M WITHOUT REMOVING."
     };
 
     // 防 out-of-range
@@ -73,20 +73,33 @@ void MissionDescription::Update() {
     bool down = Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB);
     bool up   = Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB);
 
+    // 定義一個局部 Lambda 用來判斷點擊是否落在按鈕上
+    auto returnbuttonContains = [](const glm::vec2 &pt, const glm::vec2 &buttonBL, const glm::vec2 &buttonSize) -> bool {
+        // 校正向量（根據實際需求調整）
+        const glm::vec2 correction(40.0f, 25.0f);
+        glm::vec2 correctedPos = buttonBL - correction;
+        glm::vec2 effectiveSize = buttonSize - glm::vec2(0.0f, 0.0f);
+        return pt.x >= correctedPos.x && pt.x <= (correctedPos.x + effectiveSize.x) &&
+               pt.y >= correctedPos.y && pt.y <= (correctedPos.y + effectiveSize.y);
+    };
+
+    auto playbuttonContains = [](const glm::vec2 &pt, const glm::vec2 &buttonBL, const glm::vec2 &buttonSize) -> bool {
+        // 校正向量（根據實際需求調整）
+        const glm::vec2 correction(70.0f, 45.0f);
+        glm::vec2 correctedPos = buttonBL - correction;
+        glm::vec2 effectiveSize = buttonSize - glm::vec2(1.0f, 0.0f);
+        return pt.x >= correctedPos.x && pt.x <= (correctedPos.x + effectiveSize.x) &&
+               pt.y >= correctedPos.y && pt.y <= (correctedPos.y + effectiveSize.y);
+    };
+
     if (down) {
-        m_playPressed   = (mp.x>=m_PlayBL.x && mp.x<=m_PlayBL.x+m_PlaySize.x &&
-                           mp.y>=m_PlayBL.y && mp.y<=m_PlayBL.y+m_PlaySize.y);
-        m_returnPressed = (mp.x>=m_ReturnBL.x && mp.x<=m_ReturnBL.x+m_ReturnSize.x &&
-                           mp.y>=m_ReturnBL.y && mp.y<=m_ReturnBL.y+m_ReturnSize.y);
+        m_playPressed   = playbuttonContains(mp, m_PlayBL, m_PlaySize);
+        m_returnPressed = returnbuttonContains(mp, m_ReturnBL, m_ReturnSize);
     }
     if (up) {
-        if (m_playPressed &&
-            mp.x>=m_PlayBL.x && mp.x<=m_PlayBL.x+m_PlaySize.x &&
-            mp.y>=m_PlayBL.y && mp.y<=m_PlayBL.y+m_PlaySize.y)
+        if (m_playPressed && playbuttonContains(mp, m_PlayBL, m_PlaySize))
             m_playChosen = true;
-        if (m_returnPressed &&
-            mp.x>=m_ReturnBL.x && mp.x<=m_ReturnBL.x+m_ReturnSize.x &&
-            mp.y>=m_ReturnBL.y && mp.y<=m_ReturnBL.y+m_ReturnSize.y)
+        if (m_returnPressed && returnbuttonContains(mp, m_ReturnBL, m_ReturnSize))
             m_returnChosen = true;
         m_playPressed = m_returnPressed = false;
     }

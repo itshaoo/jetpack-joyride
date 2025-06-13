@@ -43,21 +43,13 @@ void ZapperManager::SpawnZappers() {
         RESOURCE_DIR"/Image/Zapper/zapper3.png",
         RESOURCE_DIR"/Image/Zapper/zapper4.png"
     };
-    std::vector<std::string> pathsdiag = {
-        RESOURCE_DIR"/Image/Zapper/zapperZ0.png",
-        RESOURCE_DIR"/Image/Zapper/zapperZ1.png",
-        RESOURCE_DIR"/Image/Zapper/zapperZ2.png",
-        RESOURCE_DIR"/Image/Zapper/zapperZ3.png"
-    };
-    for (int i = 0; i < count; ++i) {
-        int type = std::rand() % 3;  // 0 = vertical, 1 = horizontal, 2 = diagonal
-        const auto& chosenPaths = (type == 0 ? pathsVert
-                                  : type == 1 ? pathsHor
-                                              : pathsdiag);
 
-        // 随机 Y：在 [m_MinY, m_MaxY] 之间
+    for (int i = 0; i < count; ++i) {
+        int type = std::rand() % 2;
+        const auto& chosenPaths = (type == 0 ? pathsVert : pathsHor);
+
         float y = m_MinY + (std::rand() / (float)RAND_MAX) * (m_MaxY - m_MinY);
-        // X = 起始 + i*间隔
+
         float x = spawnX + i * spacingX;
 
         auto zap = std::make_shared<Zapper>(chosenPaths, glm::vec2{x, y});

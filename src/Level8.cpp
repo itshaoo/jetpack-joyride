@@ -14,6 +14,8 @@ void Level8::Start() {
 void Level8::Update() {
     // 从 CollisionManager 里拿装备数量
     int collected = m_App->GetCollisionManager()->GetEquipmentCount();
+    // **新**：把当前值保存到成员变量，以便 PauseMenu 能读到进度
+    m_CollectedEquipCount = std::min(collected, m_EquipTarget);
     // （需要先在 CollisionManager 中新增 GetEquipmentCount()，见下方步骤）
     if (!m_Completed && collected >= m_EquipTarget) {
         m_Completed = true;
