@@ -14,7 +14,7 @@ public:
 
     bool IsCompleted() const override { return m_Completed; }
     int  GetCurrentCoinCount() const { return m_CurrentCoinCount; }
-    static constexpr int kTargetCoins = 50;
+    static constexpr int kTargetCoins = 40;
 private:
     App* m_App;
     static constexpr float kStartDistance = 800.0f;

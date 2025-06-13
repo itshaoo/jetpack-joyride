@@ -291,8 +291,8 @@ void App::GameUpdate() {
     backgroundSpeed = 4.0f + distanceThresholdsCrossed * speedIncrement;
 
     // ====== 新增：按下 S 鍵時加速 ======
-    if (Util::Input::IsKeyPressed(Util::Keycode::LSHIFT)) {
-        backgroundSpeed *= 2.5; // 你可以調整倍率
+    if (Util::Input::IsKeyPressed(Util::Keycode::LALT)) {
+        backgroundSpeed *= 3.5; // 你可以調整倍率
     }
 
     if(m_Player->HasLilStomper()) {

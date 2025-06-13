@@ -153,6 +153,7 @@ bool CollisionManager::Update() {
         if (CheckAABB(pPos, pSize, eq->GetPosition(), eq->GetSize())) {
             std::cout << "Player touched Equipment\n";
             // 只在第9關強制給Gravity Suit，其餘隨機
+            ++ m_EquipCount;
             if (m_App->GetCurrentLevelNumber() == 9) {
                 m_Player->EnableGravitySuit();
             } else {
