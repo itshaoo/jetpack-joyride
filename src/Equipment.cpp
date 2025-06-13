@@ -18,7 +18,7 @@ Equipment::Equipment() {
         RESOURCE_DIR "/Image/PowerUp/powerUp7.png"
     };
 
-    equipmentAnimation = std::make_shared<Animation>(equipmentFrames, /*z=*/3.0f);
+    equipmentAnimation = std::make_shared<Animation>(equipmentFrames, /*z=*/5.0f);
     equipmentAnimation->SetLooping(true);
     equipmentAnimation->SetInterval(100);
     equipmentAnimation->SetVisible(true);

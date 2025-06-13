@@ -6,10 +6,6 @@
 #include <vector>
 #include <string>
 
-/**
- * @class DistanceCounter
- * @brief HUD 顯示玩家距離，使用圖示貼圖 0~9、M
- */
 class DistanceCounter : public Util::GameObject {
 public:
     DistanceCounter(
@@ -21,9 +17,6 @@ public:
         int zOrder = 10
     );
 
-    /**
-     * @brief 設定距離（整數米），自動更新顯示
-     */
     void SetDistance(int distance);
 
 private:
@@ -35,9 +28,6 @@ private:
     float m_unitOffset;
     float m_digitScale;
 
-    /**
-     * @brief 重新建構子物件
-     */
     void rebuild(int distance);
 };
 

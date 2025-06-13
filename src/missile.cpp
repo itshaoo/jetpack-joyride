@@ -1,4 +1,4 @@
-#include "Missile.hpp"
+#include "missile.hpp"
 #include <Util/Time.hpp>
 #include "Player.hpp"
 
@@ -64,7 +64,8 @@ void Missile::UpdateMissiles(
     float spawnInterval,
     std::vector<std::shared_ptr<Missile>>& missiles,
     Util::Renderer& renderer,
-    const glm::vec2& barryPosition)
+    const glm::vec2& barryPosition,
+    float backgroundSpeed)
 {
     float deltaTime = Util::Time::GetDeltaTimeMs();
     missileSpawnTimer += deltaTime;
@@ -84,6 +85,12 @@ void Missile::UpdateMissiles(
     for (auto it = missiles.begin(); it != missiles.end(); ) {
         auto& missile = *it;
         missile->Update(deltaTime);
+
+        if (missile->IsLaunched()) {
+            auto pos = missile->GetPosition();
+            pos.x -= backgroundSpeed;
+            missile->SetPosition(pos);
+        }
 
         if (missile->IsOffScreen()) {
             it = missiles.erase(it);
@@ -141,4 +148,8 @@ void Missile::Update(float deltaTime) {
         warningAnimation->SetVisible(false);
         missileAnimation->SetVisible(true);
     }
+}
+
+void Missile::resetSpawnTimer() {
+    missileSpawnTimer = 0.0f;
 }

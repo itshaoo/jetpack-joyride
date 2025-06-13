@@ -42,8 +42,11 @@ private:
         Button(const std::string &n, const std::string &p, const glm::vec2 &bl, const glm::vec2 &sz)
           : normal(n), pressed(p), pos(bl), size(sz) {}
         bool contains(const glm::vec2 &pt) const {
-            return pt.x>=pos.x && pt.x<=pos.x+size.x &&
-                   pt.y>=pos.y && pt.y<=pos.y+size.y;
+            const glm::vec2 correction(75.0f, 25.0f);
+            glm::vec2 correctedPos = pos - correction;
+            glm::vec2 effectiveSize = size - glm::vec2(3.0f, 0.0f);
+            return pt.x >= correctedPos.x && pt.x <= correctedPos.x + effectiveSize.x &&
+                   pt.y >= correctedPos.y && pt.y <= correctedPos.y + effectiveSize.y;
         }
         void draw(bool isDown) {
             Util::Transform t;

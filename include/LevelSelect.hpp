@@ -34,8 +34,16 @@ public:
             ), position(bl), size(s) {}
 
         bool Contains(const glm::vec2 &pt) const {
-            return pt.x >= position.x && pt.x <= position.x + size &&
-                   pt.y >= position.y && pt.y <= position.y + size;
+            const glm::vec2 correction = glm::vec2(50.0f, 50.0f);
+            glm::vec2 correctedPosition = position - correction;
+            // 設定有效區域的寬度與高度，減去右邊與上邊額外的 3 像素
+            float effectiveWidth = size - 3.0f;
+            float effectiveHeight = size - 3.0f;
+
+            return pt.x >= correctedPosition.x &&
+                   pt.x <= (correctedPosition.x + effectiveWidth) &&
+                   pt.y >= correctedPosition.y &&
+                   pt.y <= (correctedPosition.y + effectiveHeight);
         }
     };
 

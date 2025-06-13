@@ -29,15 +29,14 @@ public:
     int GetLevel() const { return m_level; }
 
 private:
-    Util::Image m_Background;      // missions.png
+    Util::Image m_Background;
 
-    // 任務文字
     Util::Text  m_DescriptionText;
     glm::vec2   m_DescPos;
 
     std::string m_missionStr;
 
-    int m_level; // 新增：記錄關卡編號
+    int m_level;
 
     // Play 按鈕
     Util::Image m_PlayNormal;      // play.png

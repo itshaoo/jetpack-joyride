@@ -1,7 +1,3 @@
-//
-// Created by hao on 2025/3/14.
-//
-
 #ifndef OBJECT_H
 #define OBJECT_H
 

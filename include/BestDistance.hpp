@@ -18,8 +18,8 @@ public:
         float unitOffset = 0.4f,
         float digitScale = 0.5f,
         int zOrder = 10,
-        float bestOffsetX = -603.0f, // 新增的參數，用來控制 Best 的 X 偏移
-        float bestOffsetY = 231.0f,  // 新增的參數，用來控制 Best 的 Y 偏移
+        float bestOffsetX = -603.0f, // 控制 Best 的 X 偏移
+        float bestOffsetY = 231.0f,  // 控制 Best 的 Y 偏移
         float bestScale = 1.0f     // Best 圖像的縮放比例
     );
 

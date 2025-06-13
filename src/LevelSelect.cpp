@@ -82,7 +82,6 @@ void LevelSelect::Render() {
 
     for (int i = 0; i < (int)buttons.size(); ++i) {
         auto &btn = buttons[i];
-        bool pressed = (i == m_pressedIndex);
 
         // 按鈕圖示 (z=1)
         Util::Transform bt;
