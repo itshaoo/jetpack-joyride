@@ -7,6 +7,7 @@
 #include "Util/Time.hpp"
 #include "config.hpp"
 #include <iostream>
+#include <SDL_mixer.h>
 
 App::App()
   : m_ZapperManager(&m_Root, backgroundSpeed),
@@ -16,29 +17,23 @@ App::App()
     float btnSize = 100.0f;
     float spacing = 20.0f;
 
-    // 建立選單
     m_LevelSelect = std::make_unique<LevelSelect>(btnSize, spacing);
 }
 
-void App::Start() {
-    LOG_TRACE("Start");
-
+void App::InitGame() {
+    Mix_Resume(-1);
+    // 1) 完全重置游戏状态
     ResetGame();
 
-    // 初始化背景音樂
-    Util::BGM bgm(RESOURCE_DIR  "/Sounds/background_music.wav");
-    bgm.SetVolume(50);
-    bgm.Play(-1);
-
-    // 一開始呼叫 Render，畫出 Logo
-    Render();
-
-    // 初始化遊戲物件
+    m_CoinCounter = std::make_shared<CoinCounter>();
     m_DistanceCounter = std::make_shared<DistanceCounter>();
-    m_BestDistance = std::make_shared<BestDistance>();
-    m_Player = std::make_shared<Player>();
+    m_BestDistance    = std::make_shared<BestDistance>();
+
+    m_Player          = std::make_shared<Player>();
     m_Player->AddToRenderer(m_Root);
+
     m_CollisionMgr = std::make_unique<CollisionManager>(
+        this, // 新增
         m_Player.get(),
         &m_ZapperManager,
         &m_CoinManager,
@@ -46,12 +41,11 @@ void App::Start() {
         equipments,
         &m_Root
     );
-    m_CoinCounter = std::make_shared<CoinCounter>();
 
-    // 傳遞背景速度給背景物件
+    // 4) 启动背景滚动
     m_Background.SetBackgroundSpeed(backgroundSpeed);
-
-    m_CurrentState = State::UPDATE;
+    m_BackgroundStarted = false;
+    // Logo 会在第一帧后自动滚出
 }
 
 void App::Render() {
@@ -67,12 +61,30 @@ void App::Render() {
     } else if (m_CurrentState == State::LEVEL2) {
         GameRender();
         m_Level2->Render();
+    } else if (m_CurrentState == State::LEVEL3) {
+        GameRender();
+        m_Level3->Render();
+    } else if (m_CurrentState == State::LEVEL4) {
+        GameRender();
+        m_Level4->Render();
+    } else if (m_CurrentState == State::LEVEL5) {
+        GameRender();
+        m_Level5->Render();
+    } else if (m_CurrentState == State::LEVEL6) {
+        GameRender();
+        m_Level6->Render();
     } else if (m_CurrentState == State::LEVEL7) {
         GameRender();
         m_Level7->Render();
     } else if (m_CurrentState == State::LEVEL8) {
         GameRender();
         m_Level8->Render();
+    } else if (m_CurrentState == State::LEVEL9) {
+        GameRender();
+        m_Level9->Render();
+    } else if (m_CurrentState == State::LEVEL10) {
+        GameRender();
+        m_Level10->Render();
     } else if (m_CurrentState == State::GAMEOVER) {
         // 1) 畫 total.png 全螢幕
         Util::Image totalImg(RESOURCE_DIR "/Image/GameOver/total.png");
@@ -82,6 +94,19 @@ void App::Render() {
             float(WINDOW_HEIGHT) / totalImg.GetSize().y
         };
         totalImg.Draw(Util::ConvertToUniformBufferData(t, totalImg.GetSize(), 0.0f));
+
+        auto buttonContains = [](const glm::vec2 &pt, const glm::vec2 &btnPos, const glm::vec2 &btnSize) -> bool {
+            // 注意這裡設定的 correction 與扣除的像素值可以根據所有按鈕統一調整
+            const glm::vec2 correction(120.0f, 50.0f);
+            glm::vec2 correctedPos = btnPos - correction;
+            float effectiveWidth  = btnSize.x - 0.0f;
+            float effectiveHeight = btnSize.y - 0.0f;
+            return pt.x >= correctedPos.x &&
+                   pt.x <= (correctedPos.x + effectiveWidth) &&
+                   pt.y >= correctedPos.y &&
+                   pt.y <= (correctedPos.y + effectiveHeight);
+        };
+
         // 2) 繪製 Retry 按鈕 (自行調整路徑/大小/位置)
         static Util::Image retryN(RESOURCE_DIR "/Image/Pause/retry.png");
         static Util::Image retryP(RESOURCE_DIR "/Image/Pause/retry2.png");
@@ -89,8 +114,7 @@ void App::Render() {
         glm::vec2 btnSize = { 240.0f,  96.0f };
         bool down = Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB);
         glm::vec2 mp = Util::Input::GetCursorPosition();
-        bool over = mp.x>=btnPos.x && mp.x<=btnPos.x+btnSize.x
-                    && mp.y>=btnPos.y && mp.y<=btnPos.y+btnSize.y;
+        bool over = buttonContains(mp, btnPos, btnSize);
         Util::Transform bt;
         bt.translation = btnPos;
         bt.scale = { btnSize.x/retryN.GetSize().x,
@@ -105,8 +129,7 @@ void App::Render() {
             glm::vec2 btnSize  = { 240.0f, 96.0f };
             glm::vec2 mp       = Util::Input::GetCursorPosition();
             bool down          = Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB);
-            bool overQuit      = mp.x>=quitPos.x && mp.x<=quitPos.x+btnSize.x
-                              && mp.y>=quitPos.y && mp.y<=quitPos.y+btnSize.y;
+            bool overQuit      = buttonContains(mp, quitPos, btnSize);
             Util::Transform qt;
             qt.translation = quitPos;
             qt.scale       = { btnSize.x/quitN.GetSize().x,
@@ -170,13 +193,93 @@ void App::Render() {
 
     // 如果在暫停，疊加暫停頁面
     if (m_CurrentState == State::PAUSED) {
+        // 准备两行文字对象
+        static std::shared_ptr<Util::Text> line1 =
+            std::make_shared<Util::Text>(
+                RESOURCE_DIR "/font/OpenSans_Condensed-ExtraBold.ttf",
+                28,
+                " ",
+                Util::Color::FromName(Util::Colors::WHITE)
+            );
+        static std::shared_ptr<Util::Text> line2 =
+            std::make_shared<Util::Text>(
+                RESOURCE_DIR "/font/OpenSans_Condensed-ExtraBold.ttf",
+                28,
+                " ",
+                Util::Color::FromName(Util::Colors::WHITE)
+            );
+
+        bool needDrawProgress = false;
+
+        if (m_CurrentLevelNumber == 3 && m_Level3) {
+            int  redCount = GetLevel3RedCount();
+            line1->SetText("RED LIGHT: " + std::to_string(redCount) + "/10");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 4 && m_Level4) {
+            float raw = static_cast<Level4*>(m_Level4.get())->GetCurrentWalkDistance();
+            int shown = std::min( static_cast<int>(raw), static_cast<int>(static_cast<Level4*>(m_Level4.get())->GetTargetDistance()) );
+            line1->SetText("DISTANCE: " + std::to_string(shown) + "/500");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 5 && m_Level5) {
+            float fd = static_cast<Level5*>(m_Level5.get())->GetCurrentFlightDistance();
+            line1->SetText("DISTANCE: " + std::to_string(static_cast<int>(fd)) + "/500");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 6 && m_Level6) {
+            int coins = static_cast<Level6*>(m_Level6.get())->GetCurrentCoinCount();
+            line1->SetText("COIN: " + std::to_string(coins) + "/" + std::to_string(Level6::kTargetCoins));
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 8 && m_Level8) {
+            int  equipCount = GetLevel8EquipCount();
+            line1->SetText("VEHICLE: " + std::to_string(equipCount) + "/2");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 9 && m_Level9) {
+            float cd = static_cast<Level9*>(m_Level9.get())->GetCurrentCeilingDistance();
+            line1->SetText("DISTANCE: " + std::to_string(static_cast<int>(cd)) + "/300");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        } else if (m_CurrentLevelNumber == 10 && m_Level10) {
+            float vd = static_cast<Level10*>(m_Level10.get())->GetCurrentVehicleDistance();
+            line1->SetText("DISTANCE: " + std::to_string(static_cast<int>(vd)) + "/700");
+            line2->SetText(" ");
+            needDrawProgress = true;
+        }
+
+        if (needDrawProgress) {
+            // 先算出两行文字的宽高，方便居中对齐 + 向右/向下微调
+            glm::vec2 size1 = line1->GetSize();
+            glm::vec2 size2 = line2->GetSize();
+            float lineSpacing = 10.0f;             // 行间距
+            float blockWidth  = std::max(size1.x, size2.x);
+            float blockHeight = size1.y + size2.y + lineSpacing;
+
+            float offsetX = 100.0f; // 向右 100
+            float offsetY = 60.0f; // 向下 60
+
+            // 画第一行
+            Util::Transform t1;
+            t1.translation.x = -blockWidth * 0.5f + offsetX;
+            t1.translation.y =  blockHeight * 0.5f - size1.y * 0.5f - offsetY;
+            line1->Draw(Util::ConvertToUniformBufferData(t1, size1, 2.0f));
+
+            // 画第二行（紧接在第一行下面）
+            Util::Transform t2;
+            t2.translation.x = -blockWidth * 0.5f + offsetX;
+            t2.translation.y = t1.translation.y - (size1.y * 0.5f + lineSpacing + size2.y * 0.5f);
+            line2->Draw(Util::ConvertToUniformBufferData(t2, size2, 2.0f));
+        }
+
+        // 再把原来的暂停菜单（按钮、半透明蒙版等）画上去
         m_PauseMenu->Render();
     }
 }
 
 void App::GameUpdate() {
-    // 計算距離達到每 1000 米時增加背景速度
-    int distanceThreshold = 1000;  // 每 1000 米增加背景速度
+    int distanceThreshold = 300;  // 每 300 米增加背景速度
     float speedIncrement = 0.5f;  // 每次增加的背景速度
 
     float playerDistance = m_Player->GetDistance();
@@ -187,6 +290,16 @@ void App::GameUpdate() {
     // 計算背景速度增量
     backgroundSpeed = 4.0f + distanceThresholdsCrossed * speedIncrement;
 
+    // ====== 新增：按下 S 鍵時加速 ======
+    if (Util::Input::IsKeyPressed(Util::Keycode::LSHIFT)) {
+        backgroundSpeed *= 2.5; // 你可以調整倍率
+    }
+
+    if(m_Player->HasLilStomper()) {
+        // 如果玩家有 Lil Stomper，背景速度增加一倍
+        backgroundSpeed *= 2;
+    }
+
     // 更新背景速度
     m_Background.SetBackgroundSpeed(backgroundSpeed);
 
@@ -195,18 +308,43 @@ void App::GameUpdate() {
 
     if (!m_BackgroundStarted && m_Logo.IsOffScreen()) {
         m_BackgroundStarted = true;
+
+        m_LastPlayerDistance = m_Player->GetDistance();
+        m_DisplayDistance    = 0.0f;
+        m_Distance           = 0.0f;
+
+        if (!m_BgmStarted) {
+            m_BGM.SetVolume(50);
+            m_BGM.Play(-1);
+            m_BgmStarted = true;
+        }
+
         m_Root.AddChild(m_CoinCounter);
         m_Root.AddChild(m_DistanceCounter);
         m_Root.AddChild(m_BestDistance);
         m_Background.NotifyLogoOffScreen();
+
+        m_Player->StartRunningAnimation();
     }
 
     if (m_BackgroundStarted) {
         m_Background.Update();
         m_Player->Update();
 
-        float playerDistance = m_Player->GetDistance();
-        m_DistanceCounter->SetDistance(playerDistance);
+        // 1) 用 rawPlayerDistance 計算 deltaRaw
+        float rawPlayerDistance = m_Player->GetDistance();
+        float deltaRaw = rawPlayerDistance - m_LastPlayerDistance;
+        m_LastPlayerDistance = rawPlayerDistance;
+
+        // 2) 依照當前背景速度倍率（backgroundSpeed / 4.0f）去調整這段 delta，
+        //    累加到 m_DisplayDistance
+        float speedRatio = backgroundSpeed / 4.0f;
+        m_DisplayDistance += deltaRaw * speedRatio;
+        if (m_DisplayDistance < 0.0f) m_DisplayDistance = 0.0f;
+
+        // 3) 再把這個平滑的顯示距離寫回 m_Distance，並送給 HUD
+        m_Distance = m_DisplayDistance;
+        m_DistanceCounter->SetDistance(static_cast<int>(m_Distance));
 
         switch (m_SpawnPhase) {
             case SpawnPhase::ZAPPER:
@@ -245,20 +383,29 @@ void App::GameUpdate() {
                 break;
 
             case SpawnPhase::EQUIP:
+                // 如果玩家已经穿着装备，就跳过这一阶段
+                if (m_Player->IsWearingVehicle()) {
+                    // 直接重置 spawnPhase 到下一波障碍
+                    m_SpawnPhase            = SpawnPhase::ZAPPER;
+                    m_HasSpawnedCurrentWave = false;
+                    m_EquipSpawnedOnce      = false;
+                    // 重设下一轮波次数
+                    m_ZapperWavesLeft = 1;
+                    m_CoinWavesLeft   = 3;
+                    break;
+                }
+                // 正常的装备生成／移动逻辑
                 if (!m_EquipSpawnedOnce) {
-                    // 第一次进入 EQUIP 阶段，调用一次 spawn
-                    Equipment::UpdateEquipments(
+                     Equipment::UpdateEquipments(
                         EquipmentspawnInterval,
                         equipments,
                         m_Root,
                         backgroundSpeed
-                    );
-                    // 只要容器里 push 过一个，就认为 spawn 过了
-                    if (!equipments.empty()) {
+                     );
+                     if (!equipments.empty()) {
                         m_EquipSpawnedOnce = true;
-                    }
+                     }
                 } else {
-                    // 之后只更新位置并移除越界，不再 spawn
                     for (auto it = equipments.begin(); it != equipments.end(); ) {
                         auto& eq = *it;
                         eq->Update(backgroundSpeed);
@@ -270,7 +417,6 @@ void App::GameUpdate() {
                         }
                     }
                 }
-
                 // 所有装备都处理完毕后，回到下一轮 ZAPPER
                 if (m_EquipSpawnedOnce && equipments.empty()) {
                     m_SpawnPhase            = SpawnPhase::ZAPPER;
@@ -287,10 +433,12 @@ void App::GameUpdate() {
             m_MissileSpawnInterval,
             m_Missiles,
             m_Root,
-            m_Player->GetPosition()
+            m_Player->GetPosition(),
+            backgroundSpeed
         );
 
         if (m_CollisionMgr->Update()) {
+            Mix_HaltChannel(-1);
             m_CurrentState = State::GAMEOVER;
         }
         m_CoinCounter->SetCount(m_CollisionMgr->GetCoinCount());
@@ -312,6 +460,7 @@ void App::ResetGame() {
 
     // 2) 清掉所有遊戲物件容器
     m_Missiles.clear();
+    Missile::resetSpawnTimer();
     equipments.clear();
 
     // 3) 重建各個 manager，並把它們綁到新的 renderer
@@ -334,12 +483,123 @@ void App::ResetGame() {
     m_BestDistance.reset();
 
     m_BackgroundStarted = false;
+
+    m_Distance = 0.0f;
 }
 
 void App::Update() {
-    // —— 1) 统一处理按 P 进入 Pause ——
-    if (m_CurrentLevel && Util::Input::IsKeyUp(Util::Keycode::P))
-    {
+    // ====== 新增：數字鍵跳關（不影響原有功能）======
+    if (m_CurrentState == State::LEVEL1 || m_CurrentState == State::LEVEL2 ||
+        m_CurrentState == State::LEVEL3 || m_CurrentState == State::LEVEL4 ||
+        m_CurrentState == State::LEVEL5 || m_CurrentState == State::LEVEL6 ||
+        m_CurrentState == State::LEVEL7 || m_CurrentState == State::LEVEL8 ||
+        m_CurrentState == State::LEVEL9 || m_CurrentState == State::LEVEL10) {
+        for (int i = 0; i < 10; ++i) {
+            Util::Keycode key = static_cast<Util::Keycode>(static_cast<int>(Util::Keycode::NUM_1) + i);
+            if (Util::Input::IsKeyPressed(key)) {
+                int targetLevel = (i == 9) ? 10 : (i + 1);
+                m_CurrentLevelNumber = targetLevel;
+                m_MissionDesc = std::make_unique<MissionDescription>(targetLevel);
+                m_Logo       = Logo();         // 新增：重建 Logo
+                m_Background = Background();   // 新增：重建背景
+                m_BackgroundStarted = false;   // 新增：強制從 Logo 開始
+                InitGame();
+                switch (targetLevel) {
+                    case 1:
+                        std::cout << "Switching to Level 1" << std::endl;
+                        m_Level1 = std::make_unique<Level1>(this);
+                        m_Level1->Start();
+                        m_CurrentState = State::LEVEL1;
+                        m_CurrentLevel = m_Level1.get();
+                        break;
+                    case 2:
+                        std::cout << "Switching to Level 2" << std::endl;
+                        m_Level2 = std::make_unique<Level2>(this);
+                        m_Level2->Start();
+                        m_CurrentState = State::LEVEL2;
+                        m_CurrentLevel = m_Level2.get();
+                        break;
+                    case 3:
+                        std::cout << "Switching to Level 3" << std::endl;
+                        m_Level3 = std::make_unique<Level3>(this);
+                        m_Level3->Start();
+                        m_CurrentState = State::LEVEL3;
+                        m_CurrentLevel = m_Level3.get();
+                        break;
+                    case 4:
+                        std::cout << "Switching to Level 4" << std::endl;
+                        m_Level4 = std::make_unique<Level4>(this);
+                        m_Level4->Start();
+                        m_CurrentState = State::LEVEL4;
+                        m_CurrentLevel = m_Level4.get();
+                        break;
+                    case 5:
+                        std::cout << "Switching to Level 5" << std::endl;
+                        m_Level5 = std::make_unique<Level5>(this);
+                        m_Level5->Start();
+                        m_CurrentState = State::LEVEL5;
+                        m_CurrentLevel = m_Level5.get();
+                        break;
+                    case 6:
+                        std::cout << "Switching to Level 6" << std::endl;
+                        m_Level6 = std::make_unique<Level6>(this);
+                        m_Level6->Start();
+                        m_CurrentState = State::LEVEL6;
+                        m_CurrentLevel = m_Level6.get();
+                        break;
+                    case 7:
+                        std::cout << "Switching to Level 7" << std::endl;
+                        m_Level7 = std::make_unique<Level7>(this);
+                        m_Level7->Start();
+                        m_CurrentState = State::LEVEL7;
+                        m_CurrentLevel = m_Level7.get();
+                        break;
+                    case 8:
+                        std::cout << "Switching to Level 8" << std::endl;
+                        m_Level8 = std::make_unique<Level8>(this);
+                        m_Level8->Start();
+                        m_CurrentState = State::LEVEL8;
+                        m_CurrentLevel = m_Level8.get();
+                        break;
+                    case 9:
+                        std::cout << "Switching to Level 9" << std::endl;
+                        m_Level9 = std::make_unique<Level9>(this);
+                        m_Level9->Start();
+                        m_CurrentState = State::LEVEL9;
+                        m_CurrentLevel = m_Level9.get();
+                        break;
+                    case 10:
+                        std::cout << "Switching to Level 10" << std::endl;
+                        m_Level10 = std::make_unique<Level10>(this);
+                        m_Level10->Start();
+                        m_CurrentState = State::LEVEL10;
+                        m_CurrentLevel = m_Level10.get();
+                        break;
+                }
+                return;
+            }
+        }
+    }
+    // Tab 切換無敵模式
+    if (Util::Input::IsKeyUp(Util::Keycode::TAB)) {
+        m_GodMode = !m_GodMode;
+        std::cout << "GodMode: " << (m_GodMode ? "ON" : "OFF") << std::endl;
+    }
+    bool isInGameplay =
+       m_CurrentState == State::UPDATE
+    || m_CurrentState == State::LEVEL1
+    || m_CurrentState == State::LEVEL2
+    || m_CurrentState == State::LEVEL3
+    || m_CurrentState == State::LEVEL4
+    || m_CurrentState == State::LEVEL5
+    || m_CurrentState == State::LEVEL6
+    || m_CurrentState == State::LEVEL7
+    || m_CurrentState == State::LEVEL8
+    || m_CurrentState == State::LEVEL9
+    || m_CurrentState == State::LEVEL10;
+
+    if (isInGameplay && Util::Input::IsKeyUp(Util::Keycode::P)) {
+        Mix_Pause(-1);
         m_PreviousState = m_CurrentState;
         // 构造并启动暂停界面
         auto* md = static_cast<MissionDescription*>(m_MissionDesc.get());
@@ -373,6 +633,7 @@ void App::Update() {
         m_MissionDesc->Update();
         auto* md = static_cast<MissionDescription*>(m_MissionDesc.get());
         if (md->IsPlayChosen()) {
+            InitGame();
             m_CurrentLevelNumber = md->GetLevel();
             // 根據關卡編號實例化對應的關卡（目前只有第一關）
             if (m_CurrentLevelNumber == 1) {
@@ -385,6 +646,26 @@ void App::Update() {
                 m_Level2->Start();
                 m_CurrentState = State::LEVEL2;
                 m_CurrentLevel   = m_Level2.get();
+            } else if (m_CurrentLevelNumber == 3) {
+                m_Level3 = std::make_unique<Level3>(this);
+                m_Level3->Start();
+                m_CurrentState = State::LEVEL3;
+                m_CurrentLevel   = m_Level3.get();
+            }  else if (m_CurrentLevelNumber == 4) {
+                m_Level4 = std::make_unique<Level4>(this);
+                m_Level4->Start();
+                m_CurrentState = State::LEVEL4;
+                m_CurrentLevel   = m_Level4.get();
+            } else if (m_CurrentLevelNumber == 5) {
+                m_Level5 = std::make_unique<Level5>(this);
+                m_Level5->Start();
+                m_CurrentState = State::LEVEL5;
+                m_CurrentLevel   = m_Level5.get();
+            }  else if (m_CurrentLevelNumber == 6) {
+                m_Level6 = std::make_unique<Level6>(this);
+                m_Level6->Start();
+                m_CurrentState = State::LEVEL6;
+                m_CurrentLevel   = m_Level6.get();
             } else if (m_CurrentLevelNumber == 7) {
                 m_Level7 = std::make_unique<Level7>(this);
                 m_Level7->Start();
@@ -395,9 +676,23 @@ void App::Update() {
                 m_Level8->Start();
                 m_CurrentState = State::LEVEL8;
                 m_CurrentLevel   = m_Level8.get();
+            }  else if (m_CurrentLevelNumber == 9) {
+                m_Level9 = std::make_unique<Level9>(this);
+                m_Level9->Start();
+                m_CurrentState = State::LEVEL9;
+                m_CurrentLevel   = m_Level9.get();
+            }  else if (m_CurrentLevelNumber == 10) {
+                m_Level10 = std::make_unique<Level10>(this);
+                m_Level10->Start();
+                m_CurrentState = State::LEVEL10;
+                m_CurrentLevel   = m_Level10.get();
             }
         } else if (md->IsReturnChosen()) {
-            // 点了 Back
+            if (m_BgmStarted) {
+                m_BGM.FadeOut(0);
+                m_BgmStarted = false;
+            }
+
             static_cast<LevelSelect*>(m_LevelSelect.get())->Start();
             m_CurrentState = State::LEVEL_SELECT;
         }
@@ -407,12 +702,30 @@ void App::Update() {
     } else if (m_CurrentState == State::LEVEL2) {
         GameUpdate();
         m_Level2->Update();
+    } else if (m_CurrentState == State::LEVEL3) {
+        GameUpdate();
+        m_Level3->Update();
+    } else if (m_CurrentState == State::LEVEL4) {
+        GameUpdate();
+        m_Level4->Update();
+    } else if (m_CurrentState == State::LEVEL5) {
+        GameUpdate();
+        m_Level5->Update();
+    } else if (m_CurrentState == State::LEVEL6) {
+        GameUpdate();
+        m_Level6->Update();
     } else if (m_CurrentState == State::LEVEL7) {
         GameUpdate();
         m_Level7->Update();
     } else if (m_CurrentState == State::LEVEL8) {
         GameUpdate();
         m_Level8->Update();
+    } else if (m_CurrentState == State::LEVEL9) {
+        GameUpdate();
+        m_Level9->Update();
+    } else if (m_CurrentState == State::LEVEL10) {
+        GameUpdate();
+        m_Level10->Update();
     } else if (m_CurrentState == State::UPDATE) {
         // 正常游戏模式
         GameUpdate();
@@ -420,13 +733,14 @@ void App::Update() {
         // 暂停界面
         m_PauseMenu->Update();
         if (m_PauseMenu->IsResumeChosen()) {
+            Mix_Resume(-1);
             // Resume 回去之前的状态
             m_CurrentState = m_PreviousState;
         } else if (m_PauseMenu->IsRetryChosen()) {
             m_Logo       = Logo();
             m_Background = Background();
 
-            ResetGame();
+            InitGame();
 
             switch (m_CurrentLevelNumber) {
                 case 1:
@@ -441,6 +755,30 @@ void App::Update() {
                     m_CurrentState = State::LEVEL2;
                     m_CurrentLevel = m_Level2.get();
                     break;
+                case 3:
+                    m_Level3 = std::make_unique<Level3>(this);
+                    m_Level3->Start();
+                    m_CurrentState = State::LEVEL3;
+                    m_CurrentLevel = m_Level3.get();
+                    break;
+                case 4:
+                    m_Level4 = std::make_unique<Level4>(this);
+                    m_Level4->Start();
+                    m_CurrentState = State::LEVEL4;
+                    m_CurrentLevel = m_Level4.get();
+                    break;
+                case 5:
+                    m_Level5 = std::make_unique<Level5>(this);
+                    m_Level5->Start();
+                    m_CurrentState = State::LEVEL5;
+                    m_CurrentLevel = m_Level5.get();
+                    break;
+                case 6:
+                    m_Level6 = std::make_unique<Level6>(this);
+                    m_Level6->Start();
+                    m_CurrentState = State::LEVEL6;
+                    m_CurrentLevel = m_Level6.get();
+                    break;
                 case 7:
                     m_Level7 = std::make_unique<Level7>(this);
                     m_Level7->Start();
@@ -453,8 +791,24 @@ void App::Update() {
                     m_CurrentState = State::LEVEL8;
                     m_CurrentLevel = m_Level8.get();
                     break;
+                case 9:
+                    m_Level9 = std::make_unique<Level9>(this);
+                    m_Level9->Start();
+                    m_CurrentState = State::LEVEL9;
+                    m_CurrentLevel = m_Level9.get();
+                    break;
+                case 10:
+                    m_Level10 = std::make_unique<Level10>(this);
+                    m_Level10->Start();
+                    m_CurrentState = State::LEVEL10;
+                    m_CurrentLevel = m_Level10.get();
+                    break;
             }
         } else if (m_PauseMenu->IsQuitChosen()) {
+            if (m_BgmStarted) {
+                m_BGM.FadeOut(0);
+                m_BgmStarted = false;
+            }
             // Quit → 回任务说明
             m_Logo       = Logo();
             m_Background = Background();
@@ -481,20 +835,29 @@ void App::Update() {
             Util::Input::IfExit()) {
             m_CurrentState = State::END;
             return;
-            }
+        }
+
+        auto buttonContains = [](const glm::vec2 &pt, const glm::vec2 &btnPos, const glm::vec2 &btnSize) -> bool {
+            const glm::vec2 correction(120.0f, 50.0f);
+            glm::vec2 correctedPos = btnPos - correction;
+            float effectiveWidth  = btnSize.x - 0.0f;
+            float effectiveHeight = btnSize.y - 0.0f;
+            return pt.x >= correctedPos.x &&
+                   pt.x <= (correctedPos.x + effectiveWidth) &&
+                   pt.y >= correctedPos.y &&
+                   pt.y <= (correctedPos.y + effectiveHeight);
+        };
         // 處理 Retry 按鈕點擊
         bool up = Util::Input::IsKeyUp(Util::Keycode::MOUSE_LB);
         glm::vec2 mp = Util::Input::GetCursorPosition();
         glm::vec2 btnPos  = { 483.0f, -260.0f };
         glm::vec2 btnSize = { 240.0f,  96.0f };
-        bool over = mp.x>=btnPos.x && mp.x<=btnPos.x+btnSize.x
-                    && mp.y>=btnPos.y && mp.y<=btnPos.y+btnSize.y;
-        if (up && over) {
+        if (up && buttonContains(mp, btnPos, btnSize)) {
             // 重置整個遊戲回到選關
             m_Logo       = Logo();
             m_Background = Background();
 
-            ResetGame();
+            InitGame();
 
             switch (m_CurrentLevelNumber) {
                 case 1:
@@ -509,6 +872,30 @@ void App::Update() {
                     m_CurrentState = State::LEVEL2;
                     m_CurrentLevel = m_Level2.get();
                     break;
+                case 3:
+                    m_Level3 = std::make_unique<Level3>(this);
+                    m_Level3->Start();
+                    m_CurrentState = State::LEVEL3;
+                    m_CurrentLevel = m_Level3.get();
+                    break;
+                case 4:
+                    m_Level4 = std::make_unique<Level4>(this);
+                    m_Level4->Start();
+                    m_CurrentState = State::LEVEL4;
+                    m_CurrentLevel = m_Level4.get();
+                    break;
+                case 5:
+                    m_Level5 = std::make_unique<Level5>(this);
+                    m_Level5->Start();
+                    m_CurrentState = State::LEVEL5;
+                    m_CurrentLevel = m_Level5.get();
+                    break;
+                case 6:
+                    m_Level6 = std::make_unique<Level6>(this);
+                    m_Level6->Start();
+                    m_CurrentState = State::LEVEL6;
+                    m_CurrentLevel = m_Level6.get();
+                    break;
                 case 7:
                     m_Level7 = std::make_unique<Level7>(this);
                     m_Level7->Start();
@@ -521,6 +908,18 @@ void App::Update() {
                     m_CurrentState = State::LEVEL8;
                     m_CurrentLevel = m_Level8.get();
                     break;
+                case 9:
+                    m_Level9 = std::make_unique<Level9>(this);
+                    m_Level9->Start();
+                    m_CurrentState = State::LEVEL9;
+                    m_CurrentLevel = m_Level9.get();
+                    break;
+                case 10:
+                    m_Level10 = std::make_unique<Level10>(this);
+                    m_Level10->Start();
+                    m_CurrentState = State::LEVEL10;
+                    m_CurrentLevel = m_Level10.get();
+                    break;
             }
         }
         {
@@ -529,9 +928,12 @@ void App::Update() {
             glm::vec2 quitMp2  = Util::Input::GetCursorPosition();
             glm::vec2 quitPos2 = { -490.0f, -260.0f };
             glm::vec2 quitSize2 = { 240.0f, 96.0f };
-            bool overQuit2 = quitMp2.x>=quitPos2.x && quitMp2.x<=quitPos2.x+quitSize2.x
-                                      && quitMp2.y>=quitPos2.y && quitMp2.y<=quitPos2.y+quitSize2.y;
-            if (quitUp && overQuit2) {
+
+            if (quitUp &&  buttonContains(quitMp2, quitPos2, quitSize2)) {
+                if (m_BgmStarted) {
+                    m_BGM.FadeOut(0);
+                    m_BgmStarted = false;
+                }
                 // 先重置整個遊戲狀態
                 m_Logo       = Logo();
                 m_Background = Background();
@@ -558,6 +960,24 @@ CollisionManager* App::GetCollisionManager() {
 
 PauseMenu* App::GetPauseMenu() {
     return m_PauseMenu.get();
+}
+
+int App::GetLevel3RedCount() const {
+    if (m_Level3) {
+        return m_Level3->GetRedTouchedCount();
+    }
+    return 0;
+}
+
+float App::GetLevel4Distance() const {
+    return m_Player->GetWalkDistance();
+}
+
+int App::GetLevel8EquipCount() const {
+    if (m_Level8) {
+        return m_Level8->GetEquipCount();
+    }
+    return 0;
 }
 
 void App::End() {

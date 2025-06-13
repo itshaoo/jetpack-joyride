@@ -11,7 +11,7 @@ public:
 
     void SetPosition(const glm::vec2& position);
     void AddToRenderer(Util::Renderer& renderer);
-    void Update(float backgroundSpeed); // 接受背景速度作為參數
+    void Update(float backgroundSpeed);
     bool IsOffScreen() const;
     std::shared_ptr<Animation> equipmentAnimation;
 

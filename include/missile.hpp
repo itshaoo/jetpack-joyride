@@ -13,7 +13,7 @@ public:
 
     void SetTargetPosition(const glm::vec2& targetPosition);
     void SetPosition(const glm::vec2& position);
-    void SetBarryPositionPtr(const glm::vec2* barryPositionPtr);  // New method to set Barry's position pointer
+    void SetBarryPositionPtr(const glm::vec2* barryPositionPtr);  // to set Barry's position pointer
     void AddToRenderer(Util::Renderer& renderer);
     void Launch();
 
@@ -23,11 +23,16 @@ public:
     static void UpdateMissiles(float spawnInterval,
                                std::vector<std::shared_ptr<Missile>>& missiles,
                                Util::Renderer& renderer,
-                               const glm::vec2& barryPosition);
+                               const glm::vec2& barryPosition,
+                               float backgroundSpeed);
 
     glm::vec2 GetPosition() const { return m_Position; }
     glm::vec2 GetSize()     const { return missileAnimation->GetScaledSize(); }
     std::shared_ptr<Animation> GetAnimationPtr() const { return missileAnimation; }
+
+    bool IsLaunched() const { return m_Launched; }
+
+    static void resetSpawnTimer();
 
 private:
     glm::vec2 m_Position = {650.0f, 0.0f};

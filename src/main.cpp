@@ -22,14 +22,20 @@ int main(int, char**) {
             case App::State::MISSION_DESCRIPTION:
             case App::State::LEVEL1:
             case App::State::LEVEL2:
+            case App::State::LEVEL3:
+            case App::State::LEVEL4:
+            case App::State::LEVEL5:
+            case App::State::LEVEL6:
             case App::State::LEVEL7:
             case App::State::LEVEL8:
+            case App::State::LEVEL9:
+            case App::State::LEVEL10:
             case App::State::UPDATE:
             case App::State::PAUSED:
             case App::State::GAMEOVER:
                 app.Update();
-            app.Render();
-            break;
+                app.Render();
+                break;
             case App::State::START:
                 app.Start();
             break;

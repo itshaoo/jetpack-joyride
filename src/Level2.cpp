@@ -27,6 +27,4 @@ void Level2::Update() {
     }
 }
 
-void Level2::Render() {
-    // empty: 第二關暫時不需額外畫面
-}
+void Level2::Render() {}
